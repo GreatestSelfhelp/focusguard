@@ -85,6 +85,10 @@ textarea{resize:vertical;font-size:13px;}
 .ans button.correct{border-color:var(--green);background:rgba(16,200,96,.15);color:var(--green);}
 .ans button.wrong{border-color:var(--red);background:rgba(255,77,94,.13);color:#ff97a1;}
 .betweenq{text-align:center;padding:30px 0;font-size:16px;color:var(--tx2);}
+.justify{margin-top:6px;}
+.justify label{display:block;font-size:13px;color:var(--gold);font-weight:650;margin-bottom:8px;}
+.justify textarea{width:100%;min-height:80px;background:var(--card2);border:1px solid var(--bd2);border-radius:12px;padding:12px 13px;color:var(--tx);font-size:14.5px;outline:none;resize:none;}
+.justify textarea.flagged{border-color:var(--red);}
 .flash{position:fixed;inset:0;background:rgba(255,77,94,.93);z-index:50;display:none;align-items:center;justify-content:center;text-align:center;pointer-events:none;padding:20px;}
 .flash .in{font-size:20px;font-weight:800;color:#1a0004;}
 .resultbox{max-height:60vh;overflow:auto;}
@@ -217,6 +221,11 @@ table.res td.bad{color:var(--red);font-weight:700;}
     <div class="timerbar"><i id="sTimer" style="width:100%"></i></div>
     <div class="qtext" id="sQText"></div>
     <div class="ans" id="sAns"></div>
+    <div class="justify" id="sJustify" style="display:none">
+      <label id="sJustifyLabel">อธิบายสั้นๆ ว่าทำไมเลือกข้อนี้ (ห้ามวางข้อความ)</label>
+      <textarea id="sJustifyBox" maxlength="220" placeholder="พิมพ์เหตุผลสั้นๆ..."></textarea>
+      <div class="hint" id="sJustifyHint"></div>
+    </div>
     <div class="betweenq" id="sBetween" style="display:none"></div>
   </div>
 
@@ -2552,16 +2561,18 @@ function loadQuiz(){
     return qz;
   }catch(e){return null;}
 }
-/* gap between questions (reveal answer) */
+/* after answering: a short justify-in-writing window, then reveal */
+var JUSTIFY=10000;
 var GAP=4000;
 function slotAt(qz,now){
-  var per=qz.tq*1000+GAP;
+  var per=qz.tq*1000+JUSTIFY+GAP;
   var el=now-qz.st;
   if(el<0)return{phase:'wait',left:-el};
   var idx=Math.floor(el/per);
   if(idx>=qz.qs.length)return{phase:'done'};
   var inQ=el-idx*per;
   if(inQ<qz.tq*1000)return{phase:'q',idx:idx,left:qz.tq*1000-inQ};
+  if(inQ<qz.tq*1000+JUSTIFY)return{phase:'justify',idx:idx,left:qz.tq*1000+JUSTIFY-inQ};
   return{phase:'gap',idx:idx,left:per-inQ};
 }
 
@@ -2663,17 +2674,33 @@ function initBuilder(){
       var valid=fghash(b64)===check;
       try{
         var d=JSON.parse(unb64url(b64));
-        return{n:d.n||'?',sc:d.sc,cor:d.cor,tot:d.tot,vc:(d.v||[]).length,valid:valid};
+        var j=d.j||{};
+        var jCount=Object.keys(j).length;
+        var pf=d.pf||[];
+        return{n:d.n||'?',sc:d.sc,cor:d.cor,tot:d.tot,vc:(d.v||[]).length,valid:valid,j:j,jCount:jCount,pf:pf};
       }catch(e){return null;}
     });
-    var html='<table class="res"><tr><th>ชื่อ</th><th>คะแนน</th><th>ถูก</th><th>สลับจอ</th><th>ตรวจสอบ</th></tr>';
+    var html='<table class="res"><tr><th>ชื่อ</th><th>คะแนน</th><th>ถูก</th><th>สลับจอ</th><th>เขียนอธิบาย</th><th>ตรวจสอบ</th></tr>';
     rows.forEach(function(r){
-      if(!r){html+='<tr><td colspan="5" class="bad">รหัสเสีย/ไม่ครบ</td></tr>';return;}
+      if(!r){html+='<tr><td colspan="6" class="bad">รหัสเสีย/ไม่ครบ</td></tr>';return;}
       html+='<tr><td>'+escHtml(r.n)+'</td><td>'+r.sc+'</td><td>'+r.cor+'/'+r.tot+'</td>'+
         '<td class="'+(r.vc>0?'bad':'')+'">'+(r.vc>0?r.vc+' ครั้ง':'—')+'</td>'+
+        '<td class="'+(r.pf.length>0?'bad':'')+'">'+r.jCount+'/'+r.tot+(r.pf.length>0?' 🚫วาง':'')+'</td>'+
         '<td>'+(r.valid?'✅':'<span class="bad">⚠️ ถูกแก้ไข</span>')+'</td></tr>';
     });
     html+='</table>';
+    var withJ=rows.filter(function(r){return r&&r.jCount>0;});
+    if(withJ.length){
+      html+='<details style="margin-top:12px"><summary style="cursor:pointer;font-size:12.5px;color:var(--tx2)">📖 อ่านคำอธิบายของนักเรียน</summary><div style="margin-top:10px">';
+      withJ.forEach(function(r){
+        html+='<div style="margin-bottom:10px"><b style="font-size:12.5px">'+escHtml(r.n)+'</b>';
+        Object.keys(r.j).forEach(function(idx){
+          html+='<div class="hint" style="margin-top:3px">ข้อ '+(parseInt(idx)+1)+': '+escHtml(r.j[idx])+'</div>';
+        });
+        html+='</div>';
+      });
+      html+='</div></details>';
+    }
     out.innerHTML=html;
     out.style.display='block';
   });
@@ -2722,7 +2749,15 @@ function initStudent(){
 
   var name='',score=0,correct=0,answers=[],violations=[];
   var answered={},hideStart=null,curIdx=-1,joined=false;
+  var justifications={},pasteFlags={},justifyInit={};
   qz.qs.forEach(function(){answers.push(-1);});
+
+  document.getElementById('sJustifyBox').addEventListener('paste',function(e){
+    e.preventDefault();
+    pasteFlags[curIdx]=true;
+    this.classList.add('flagged');
+    document.getElementById('sJustifyHint').textContent='🚫 ห้ามวางข้อความ — พิมพ์เอง';
+  });
 
   document.getElementById('sJoinBtn').addEventListener('click',function(){
     name=document.getElementById('sName').value.trim();
@@ -2764,6 +2799,7 @@ function initStudent(){
     document.getElementById('sQNum').textContent='ข้อ '+(idx+1)+' / '+qz.qs.length;
     document.getElementById('sQText').textContent=qz.qs[idx].t;
     document.getElementById('sBetween').style.display='none';
+    document.getElementById('sJustify').style.display='none';
     var ans=document.getElementById('sAns');
     ans.style.display='grid';
     ans.innerHTML='';
@@ -2810,7 +2846,23 @@ function initStudent(){
       document.getElementById('sQuiz').style.display='block';
       if(lastIdx!==s.idx){renderQ(s.idx);lastIdx=s.idx;}
       document.getElementById('sTimer').style.width=(100*s.left/(qz.tq*1000))+'%';
+    }else if(s.phase==='justify'){
+      document.getElementById('sTimer').style.width='0%';
+      var jBox=document.getElementById('sJustify');
+      if(answered[s.idx]){
+        if(!justifyInit[s.idx]){
+          justifyInit[s.idx]=true;
+          var ta=document.getElementById('sJustifyBox');
+          ta.value='';ta.classList.remove('flagged');ta.focus();
+        }
+        jBox.style.display='block';
+        justifications[s.idx]=document.getElementById('sJustifyBox').value.trim();
+        if(!pasteFlags[s.idx])document.getElementById('sJustifyHint').textContent='เหลือเวลา '+Math.ceil(s.left/1000)+' วิ';
+      }else{
+        jBox.style.display='none';
+      }
     }else if(s.phase==='gap'){
+      document.getElementById('sJustify').style.display='none';
       if(!revealed[s.idx]&&lastIdx===s.idx){revealed[s.idx]=true;revealQ(s.idx);}
       document.getElementById('sTimer').style.width='0%';
     }else if(s.phase==='done'&&lastPhase!=='done'){
@@ -2826,7 +2878,10 @@ function initStudent(){
     document.getElementById('sFinalScore').textContent=score;
     document.getElementById('sFinalDetail').textContent=
       'ถูก '+correct+' / '+qz.qs.length+' ข้อ'+(violations.length?' · สลับจอ '+violations.length+' ครั้ง':' · ไม่สลับจอเลย เก่งมาก 💯');
-    var payload={n:name,sc:score,cor:correct,tot:qz.qs.length,ans:answers,v:violations,qh:fghash(qParam),ts:Date.now()};
+    var jOut={};
+    Object.keys(justifications).forEach(function(k){if(justifications[k])jOut[k]=justifications[k];});
+    var pfOut=Object.keys(pasteFlags).map(function(k){return parseInt(k);});
+    var payload={n:name,sc:score,cor:correct,tot:qz.qs.length,ans:answers,v:violations,j:jOut,pf:pfOut,qh:fghash(qParam),ts:Date.now()};
     var b64=b64url(JSON.stringify(payload));
     document.getElementById('sCode').value=b64+'.'+fghash(b64);
   }
