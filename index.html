@@ -74,6 +74,24 @@ textarea{resize:vertical;min-height:70px;font-family:ui-monospace,Consolas,monos
 
 .foot{text-align:center;margin-top:20px;font-size:11.5px;color:var(--tx3);line-height:1.6;}
 
+/* embeddability status */
+.embedstat{display:none;margin-top:10px;font-size:12.5px;line-height:1.6;padding:11px 13px;border-radius:11px;}
+.embedstat.ok{background:rgba(16,200,96,.09);border:1px solid rgba(16,200,96,.3);color:var(--green);}
+.embedstat.blocked{background:rgba(255,77,94,.09);border:1px solid rgba(255,77,94,.32);color:#ff97a1;}
+.embedstat.unknown{background:rgba(248,208,48,.08);border:1px solid rgba(248,208,48,.28);color:var(--gold);}
+
+/* compat list */
+.compat summary{cursor:pointer;font-size:13.5px;font-weight:650;color:var(--tx);list-style:none;}
+.compat summary::-webkit-details-marker{display:none;}
+.compat summary::before{content:'▸ ';color:var(--cyan);}
+.compat[open] summary::before{content:'▾ ';}
+.compat .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;}
+.compat h4{font-size:12px;margin-bottom:6px;letter-spacing:.03em;}
+.compat h4.g{color:var(--green);}
+.compat h4.r{color:#ff97a1;}
+.compat ul{list-style:none;font-size:12.5px;line-height:1.85;color:var(--tx2);}
+@media(max-width:520px){.compat .cols{grid-template-columns:1fr;}}
+
 /* ---------- teacher result panel ---------- */
 #resultBox{display:none;}
 .qrwrap{display:flex;justify-content:center;padding:14px;background:#fff;border-radius:14px;margin-bottom:14px;}
@@ -169,7 +187,54 @@ textarea{resize:vertical;min-height:70px;font-family:ui-monospace,Consolas,monos
       <label>ชื่อแบบฝึกหัด (ไม่บังคับ — ช่วยให้จำง่าย)</label>
       <input type="text" id="assignTitle" placeholder="เช่น ใบงานบทที่ 3 - Data Science">
     </div>
-    <div class="hint" id="embedWarn" style="display:none;color:var(--gold);font-weight:600;margin-top:2px"></div>
+    <div id="embedWarn" class="embedstat"></div>
+  </div>
+
+  <div class="card">
+    <details class="compat">
+      <summary>📋 เว็บไหนใช้กับ FocusGuard ได้บ้าง?</summary>
+      <div class="cols">
+        <div>
+          <h4 class="g">✅ ใช้ได้ (ทดสอบแล้ว)</h4>
+          <ul>
+            <li>Google Forms</li>
+            <li>Microsoft Forms</li>
+            <li>Kahoot</li>
+            <li>Quizizz</li>
+            <li>Wordwall</li>
+            <li>Padlet</li>
+            <li>Typeform / Jotform</li>
+            <li>Socrative</li>
+            <li>Educaplay</li>
+            <li>Desmos / GeoGebra</li>
+            <li>PhET Simulations</li>
+            <li>Scratch (ลิงก์ embed)</li>
+            <li>YouTube (ลิงก์ embed)</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="r">❌ ใช้ไม่ได้ (เว็บเขาปิดกั้นเอง)</h4>
+          <ul>
+            <li>Gemini / AI Studio</li>
+            <li>NotebookLM</li>
+            <li>Google Sites</li>
+            <li>Blooket</li>
+            <li>Liveworksheets</li>
+            <li>Nearpod</li>
+            <li>Quizlet</li>
+            <li>Mentimeter</li>
+            <li>Genially</li>
+            <li>Baamboozle</li>
+            <li>Canva</li>
+            <li>ChatGPT / Claude</li>
+          </ul>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:12px">
+        เว็บกลุ่ม ❌ ส่ง header <code>X-Frame-Options</code> บอกเบราว์เซอร์ว่า "ห้ามแสดงฉันในกรอบของเว็บอื่น" เพื่อกันการถูกครอบหน้าจอหลอกลวง เบราว์เซอร์จะบล็อกตั้งแต่ก่อนโค้ดของ FocusGuard ทำงาน — ไม่มีวิธีแก้จากฝั่งเรา<br><br>
+        <b>Google Forms ที่มีคำถามอัปโหลดไฟล์</b> ก็ฝังไม่ได้เช่นกัน (Google บังคับให้ล็อกอิน และปิดกั้นการฝัง) — ถ้าจะใช้กับ FocusGuard ต้องเป็นฟอร์มที่ไม่มีอัปโหลดไฟล์ และไม่บังคับล็อกอิน
+      </div>
+    </details>
   </div>
 
   <div class="card">
@@ -2644,22 +2709,55 @@ function normalizeTarget(url){
   return url;
 }
 
-function checkKnownUnembeddable(url){
-  var h;
-  try{h=new URL(url).hostname.replace(/^www\./,'');}catch(e){return null;}
-  var blockedHosts=['aistudio.google.com','labs.google','gemini.google.com','notebooklm.google.com',
-    'accounts.google.com','sites.google.com','docs.google.com/presentation','claude.ai','chat.openai.com','chatgpt.com'];
-  var isFormsOk=/^docs\.google\.com$/.test(h)&&/\/forms\//.test(url);
-  if(isFormsOk)return null;
-  for(var i=0;i<blockedHosts.length;i++){
-    if(h===blockedHosts[i]||h.endsWith('.'+blockedHosts[i])){
-      return 'เว็บนี้ ('+h+') น่าจะไม่ยอมให้ฝังในกรอบ (ป้องกัน clickjacking) — FocusGuard อาจขึ้นจอขาวสำหรับนักเรียน ลองทดสอบลิงก์ก่อนแจกจริง';
-    }
+/* Verified by checking live X-Frame-Options / CSP frame-ancestors headers, 2026-07-10.
+   Re-test if a platform starts white-screening. */
+var PLATFORM_OK=['forms.gle','forms.office.com','kahoot.it','quizizz.com','wordwall.net',
+  'padlet.com','typeform.com','jotform.com','socrative.com','educaplay.com','desmos.com',
+  'phet.colorado.edu','scratch.mit.edu','geogebra.org','youtube.com','youtube-nocookie.com'];
+
+var PLATFORM_BLOCKED={
+  'gemini.google.com':'Gemini ปิดกั้นการฝังในกรอบ (X-Frame-Options: DENY) — รวมถึงลิงก์แชร์ /share/ ด้วย',
+  'aistudio.google.com':'Google AI Studio ปิดกั้นการฝังในกรอบ',
+  'notebooklm.google.com':'NotebookLM ปิดกั้นการฝังในกรอบ',
+  'labs.google':'Google Labs ปิดกั้นการฝังในกรอบ',
+  'accounts.google.com':'หน้าเข้าสู่ระบบ Google ฝังไม่ได้',
+  'sites.google.com':'Google Sites ปิดกั้นการฝังในกรอบ',
+  'blooket.com':'Blooket ปิดกั้นการฝังในกรอบ',
+  'liveworksheets.com':'Liveworksheets ปิดกั้นการฝังในกรอบ',
+  'nearpod.com':'Nearpod ปิดกั้นการฝังในกรอบ',
+  'quizlet.com':'Quizlet ปิดกั้นการฝังในกรอบ',
+  'mentimeter.com':'Mentimeter ปิดกั้นการฝังในกรอบ',
+  'menti.com':'Mentimeter ปิดกั้นการฝังในกรอบ',
+  'genially.com':'Genially ปิดกั้นการฝังในกรอบ',
+  'baamboozle.com':'Baamboozle ปิดกั้นการฝังในกรอบ',
+  'canva.com':'Canva ปิดกั้นการฝังในกรอบ',
+  'claude.ai':'Claude ปิดกั้นการฝังในกรอบ',
+  'chatgpt.com':'ChatGPT ปิดกั้นการฝังในกรอบ',
+  'chat.openai.com':'ChatGPT ปิดกั้นการฝังในกรอบ'
+};
+
+function hostOf(url){
+  try{return new URL(url).hostname.replace(/^www\./,'').toLowerCase();}catch(e){return '';}
+}
+function hostMatches(h,d){return h===d||h.endsWith('.'+d);}
+
+/* returns {level:'ok'|'blocked'|'unknown', msg:string} */
+function checkEmbeddable(url){
+  var h=hostOf(url);
+  if(!h)return{level:'unknown',msg:''};
+
+  if(h==='docs.google.com'){
+    if(/\/forms\//.test(url))return{level:'ok',msg:'Google Forms — ใช้กับ FocusGuard ได้ ✅'};
+    if(/\/pub\b/.test(url))return{level:'ok',msg:'ลิงก์เผยแพร่ของ Google — ใช้ได้ ✅'};
+    return{level:'blocked',msg:'ลิงก์ Google Docs/Slides/Sheets แบบแก้ไข ฝังไม่ได้ — ใช้เมนู ไฟล์ › แชร์ › เผยแพร่ลงเว็บ แล้วนำลิงก์ที่ลงท้าย /pub มาใช้แทน'};
   }
-  if(h==='docs.google.com'&&!/\/forms\//.test(url)){
-    return 'ลิงก์ Google นี้ไม่ใช่ Forms (เช่น Docs/Slides/Sheets) มักไม่ยอมให้ฝังในกรอบ — ลองทดสอบลิงก์ก่อนแจกจริง';
+  for(var d in PLATFORM_BLOCKED){
+    if(hostMatches(h,d))return{level:'blocked',msg:PLATFORM_BLOCKED[d]};
   }
-  return null;
+  for(var i=0;i<PLATFORM_OK.length;i++){
+    if(hostMatches(h,PLATFORM_OK[i]))return{level:'ok',msg:'แพลตฟอร์มนี้ทดสอบแล้ว ใช้กับ FocusGuard ได้ ✅'};
+  }
+  return{level:'unknown',msg:'ยังไม่เคยทดสอบเว็บนี้ — กด "ทดสอบลิงก์" ดูก่อนแจกให้นักเรียน ถ้าขึ้นจอขาวแปลว่าฝังไม่ได้'};
 }
 
 var params=new URLSearchParams(location.search);
@@ -2682,12 +2780,16 @@ function initTeacherMode(){
     target=normalizeTarget(target);
 
     var warnBox=document.getElementById('embedWarn');
-    var knownBad=checkKnownUnembeddable(target);
-    if(knownBad){
-      warnBox.style.display='block';
-      warnBox.textContent='⚠️ '+knownBad;
+    var st=checkEmbeddable(target);
+    warnBox.style.display='block';
+    warnBox.className='embedstat '+st.level;
+    if(st.level==='blocked'){
+      warnBox.innerHTML='<b>❌ เว็บนี้ใช้กับ FocusGuard ไม่ได้</b><br>'+st.msg+
+        '<br><span style="opacity:.85">นักเรียนจะเห็นจอขาว เพราะเว็บนั้นสั่งไม่ให้เบราว์เซอร์แสดงผลในกรอบ (กันการถูกครอบหน้าจอ) — แก้จากฝั่งเราไม่ได้</span>';
+    }else if(st.level==='ok'){
+      warnBox.innerHTML='<b>✅ ใช้ได้</b> '+st.msg;
     }else{
-      warnBox.style.display='none';
+      warnBox.innerHTML='<b>❓ ไม่แน่ใจ</b><br>'+st.msg;
     }
 
     var title=document.getElementById('assignTitle').value.trim();
@@ -2811,12 +2913,17 @@ function initStudentMode(){
     app.style.display='flex';
     document.getElementById('svFrame').src=target;
 
-    var loadHintTimer=setTimeout(function(){
+    // If we already know this host refuses framing, don't make the student stare at white.
+    if(checkEmbeddable(target).level==='blocked'){
       document.getElementById('svLoadHint').style.display='block';
-    },4500);
-    document.getElementById('svFrame').addEventListener('load',function(){
-      clearTimeout(loadHintTimer);
-    },{once:true});
+    }else{
+      var loadHintTimer=setTimeout(function(){
+        document.getElementById('svLoadHint').style.display='block';
+      },4500);
+      document.getElementById('svFrame').addEventListener('load',function(){
+        clearTimeout(loadHintTimer);
+      },{once:true});
+    }
 
     var fsEl=document.documentElement;
     var req=fsEl.requestFullscreen||fsEl.webkitRequestFullscreen||fsEl.mozRequestFullScreen;
