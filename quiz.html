@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>FocusGuard — โฟกัสการ์ด</title>
+<title>FocusGuard Quiz — ควิซสด</title>
 <meta name="theme-color" content="#0a0c12">
 <style>
 :root{
@@ -23,35 +23,24 @@ body{
     radial-gradient(900px 500px at 100% 110%,rgba(240,72,152,.07),transparent 55%),
     var(--bg);
 }
-a{color:inherit;}
-button,input,textarea{font-family:inherit;}
-::selection{background:rgba(0,216,240,.25);}
-
-/* ---------- shared bits ---------- */
+button,input,textarea,select{font-family:inherit;}
 .wrap{width:100%;max-width:720px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) 18px 40px;}
-.head{text-align:center;margin-bottom:28px;}
+.head{text-align:center;margin-bottom:24px;}
 .kw{font-size:11px;letter-spacing:.3em;color:var(--cyan);text-transform:uppercase;font-weight:600;margin-bottom:8px;opacity:.85;}
-.title{font-size:30px;font-weight:700;letter-spacing:-.01em;}
+.title{font-size:28px;font-weight:700;}
 .title .dot{color:var(--cyan);}
 .sub{margin-top:8px;font-size:14px;color:var(--tx2);line-height:1.5;}
-
-.card{
-  background:linear-gradient(160deg,var(--card),var(--bg2));
-  border:1px solid var(--bd);border-radius:18px;padding:20px;margin-bottom:16px;
-}
-.card h3{font-size:15px;font-weight:650;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
-
-.field{margin-bottom:14px;}
+.card{background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--bd);border-radius:18px;padding:20px;margin-bottom:16px;}
+.card h3{font-size:15px;font-weight:650;margin-bottom:12px;}
+.field{margin-bottom:12px;}
 .field label{display:block;font-size:12.5px;color:var(--tx2);margin-bottom:6px;font-weight:600;}
-.field .hint{font-size:11.5px;color:var(--tx3);margin-top:5px;line-height:1.5;}
-input[type=text],input[type=number],input[type=url],textarea{
+.hint{font-size:11.5px;color:var(--tx3);margin-top:5px;line-height:1.5;}
+input[type=text],input[type=number],textarea,select{
   width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:11px;
   padding:11px 13px;color:var(--tx);font-size:14.5px;outline:none;
 }
 input:focus,textarea:focus{border-color:var(--bd2);}
-textarea{resize:vertical;min-height:70px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-
+textarea{resize:vertical;font-size:13px;}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   background:linear-gradient(160deg,var(--cyan),var(--blue));color:#031018;
@@ -59,341 +48,199 @@ textarea{resize:vertical;min-height:70px;font-family:ui-monospace,Consolas,monos
   cursor:pointer;width:100%;transition:transform .12s,opacity .12s;
 }
 .btn:active{transform:scale(.98);}
-.btn:disabled{opacity:.45;cursor:default;}
 .btn.ghost{background:var(--card2);color:var(--tx);border:1px solid var(--bd2);}
 .btn.small{width:auto;padding:9px 14px;font-size:13px;}
 .btn.red{background:linear-gradient(160deg,#ff7a7a,var(--red));color:#2a0006;}
-
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .copyrow{display:flex;gap:8px;}
 .copyrow input{flex:1;}
-
-.badge{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:7px;}
-.badge.gold{background:rgba(248,208,48,.12);color:var(--gold);border:1px solid rgba(248,208,48,.3);}
-.badge.green{background:rgba(16,200,96,.12);color:var(--green);border:1px solid rgba(16,200,96,.3);}
-.badge.red{background:rgba(255,77,94,.12);color:var(--red);border:1px solid rgba(255,77,94,.3);}
-
+.qrwrap{display:flex;justify-content:center;padding:14px;background:#fff;border-radius:14px;margin:14px 0;}
 .foot{text-align:center;margin-top:20px;font-size:11.5px;color:var(--tx3);line-height:1.6;}
 
-/* embeddability status */
-.embedstat{display:none;margin-top:10px;font-size:12.5px;line-height:1.6;padding:11px 13px;border-radius:11px;}
-.embedstat.ok{background:rgba(16,200,96,.09);border:1px solid rgba(16,200,96,.3);color:var(--green);}
-.embedstat.blocked{background:rgba(255,77,94,.09);border:1px solid rgba(255,77,94,.32);color:#ff97a1;}
-.embedstat.unknown{background:rgba(248,208,48,.08);border:1px solid rgba(248,208,48,.28);color:var(--gold);}
+/* question editor */
+.qitem{border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--bg2);}
+.qitem .qtop{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.qitem .qnum{font-weight:800;color:var(--cyan);font-size:13px;flex-shrink:0;}
+.qitem .del{margin-left:auto;background:none;border:none;color:var(--tx3);font-size:17px;cursor:pointer;}
+.qitem .choice{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.qitem .choice input[type=radio]{width:16px;height:16px;accent-color:var(--green);flex-shrink:0;}
+.qitem .choice input[type=text]{flex:1;padding:8px 11px;font-size:13.5px;}
 
-/* compat list */
-.compat summary{cursor:pointer;font-size:13.5px;font-weight:650;color:var(--tx);list-style:none;}
-.compat summary::-webkit-details-marker{display:none;}
-.compat summary::before{content:'▸ ';color:var(--cyan);}
-.compat[open] summary::before{content:'▾ ';}
-.compat .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;}
-.compat h4{font-size:12px;margin-bottom:6px;letter-spacing:.03em;}
-.compat h4.g{color:var(--green);}
-.compat h4.r{color:#ff97a1;}
-.compat ul{list-style:none;font-size:12.5px;line-height:1.85;color:var(--tx2);}
-@media(max-width:520px){.compat .cols{grid-template-columns:1fr;}}
-
-/* ---------- teacher result panel ---------- */
-#resultBox{display:none;}
-.qrwrap{display:flex;justify-content:center;padding:14px;background:#fff;border-radius:14px;margin-bottom:14px;}
-.qrwrap svg{display:block;}
-.pinbox{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  background:rgba(248,208,48,.08);border:1px solid rgba(248,208,48,.3);border-radius:12px;
-  padding:12px 14px;margin-bottom:14px;
+/* student */
+.center{max-width:480px;margin:0 auto;padding-top:6vh;}
+.bigclock{font-size:52px;font-weight:800;font-family:ui-monospace,monospace;color:var(--cyan);text-align:center;margin:10px 0;}
+.qview{max-width:560px;margin:0 auto;}
+.qbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;color:var(--tx2);}
+.qbar .score{margin-left:auto;font-weight:800;color:var(--gold);font-family:ui-monospace,monospace;font-size:16px;}
+.timerbar{height:8px;border-radius:5px;background:var(--card2);overflow:hidden;margin-bottom:16px;}
+.timerbar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .2s linear;}
+.qtext{font-size:20px;font-weight:700;line-height:1.5;margin-bottom:18px;}
+.ans{display:grid;gap:10px;}
+.ans button{
+  text-align:left;background:var(--card);border:1px solid var(--bd2);border-radius:13px;
+  padding:15px 16px;color:var(--tx);font-size:15.5px;font-weight:600;cursor:pointer;line-height:1.4;
 }
-.pinbox .pin{font-size:24px;font-weight:800;letter-spacing:.15em;color:var(--gold);font-family:ui-monospace,monospace;}
-.pinbox .label{font-size:11.5px;color:var(--tx2);}
-
-.decodeResult{display:none;margin-top:14px;font-size:13px;line-height:1.7;}
-.decodeResult .vline{border-bottom:1px dashed var(--bd);padding:6px 0;display:flex;justify-content:space-between;gap:10px;}
-.decodeResult .vline:last-child{border-bottom:none;}
-
-/* ---------- student view ---------- */
-#studentView{display:none;}
-.sv-start{max-width:480px;margin:0 auto;padding-top:8vh;}
-.sv-start .card{text-align:center;}
-.sv-rules{text-align:left;font-size:13.5px;color:var(--tx2);line-height:1.9;margin:14px 0;}
-.sv-rules li{margin-bottom:4px;}
-
-.sv-app{display:none;flex-direction:column;height:100dvh;}
-.sv-bar{
-  display:flex;align-items:center;gap:10px;padding:10px 14px;
-  background:var(--card);border-bottom:1px solid var(--bd);flex-shrink:0;
-}
-.sv-score{font-size:15px;font-weight:800;font-family:ui-monospace,monospace;}
-.sv-score.ok{color:var(--green);}
-.sv-score.warn{color:var(--gold);}
-.sv-score.bad{color:var(--red);}
-.sv-vc{font-size:11.5px;color:var(--tx2);}
-.sv-bar .btn{width:auto;padding:8px 12px;font-size:12.5px;margin-left:auto;flex-shrink:0;}
-.sv-frame-wrap{flex:1;position:relative;background:#fff;}
-.sv-frame-wrap iframe{width:100%;height:100%;border:none;display:block;}
-.sv-loadhint{
-  position:absolute;bottom:12px;left:12px;right:12px;background:rgba(20,26,38,.95);
-  color:var(--tx2);font-size:12px;padding:10px 12px;border-radius:10px;border:1px solid var(--bd);
-  display:none;line-height:1.5;
-}
-.sv-loadhint button{background:none;border:none;color:var(--cyan);font-size:12px;font-weight:700;margin-top:4px;cursor:pointer;padding:0;}
-
-.overlay{
-  position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
-  padding:20px;text-align:center;
-}
-.overlay.warn{background:rgba(255,77,94,.94);pointer-events:none;}
-.overlay .oico{font-size:44px;margin-bottom:10px;}
-.overlay .otitle{font-size:22px;font-weight:800;color:#1a0004;margin-bottom:6px;}
-.overlay .odesc{font-size:14.5px;color:#3a0008;font-weight:600;}
-
-.overlay.lock{background:rgba(8,10,16,.97);flex-direction:column;}
-.overlay.lock .lockcard{max-width:360px;width:100%;}
-.overlay.lock .lockico{font-size:48px;margin-bottom:12px;}
-.overlay.lock h2{font-size:21px;margin-bottom:8px;}
-.overlay.lock p{font-size:13.5px;color:var(--tx2);margin-bottom:16px;line-height:1.6;}
-.pinentry{display:flex;gap:8px;justify-content:center;margin-bottom:10px;}
-.pinentry input{
-  width:100%;text-align:center;font-size:20px;letter-spacing:.3em;font-family:ui-monospace,monospace;
-}
-.shake{animation:shake .35s;}
-@keyframes shake{10%,90%{transform:translateX(-4px)}20%,80%{transform:translateX(6px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
-
-.modal-bg{position:fixed;inset:0;background:rgba(4,6,10,.75);z-index:60;display:none;align-items:center;justify-content:center;padding:18px;}
-.modal{max-width:460px;width:100%;background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--bd2);border-radius:18px;padding:22px;max-height:86vh;overflow:auto;}
-.modal h3{font-size:17px;margin-bottom:10px;}
-.modal p{font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:12px;}
-.modal .close{float:right;background:none;border:none;color:var(--tx3);font-size:20px;cursor:pointer;line-height:1;}
-
-.errpage{max-width:420px;margin:14vh auto 0;text-align:center;}
+.ans button:disabled{opacity:.55;}
+.ans button.sel{border-color:var(--cyan);background:rgba(0,216,240,.1);}
+.ans button.correct{border-color:var(--green);background:rgba(16,200,96,.15);color:var(--green);}
+.ans button.wrong{border-color:var(--red);background:rgba(255,77,94,.13);color:#ff97a1;}
+.betweenq{text-align:center;padding:30px 0;font-size:16px;color:var(--tx2);}
+.flash{position:fixed;inset:0;background:rgba(255,77,94,.93);z-index:50;display:none;align-items:center;justify-content:center;text-align:center;pointer-events:none;padding:20px;}
+.flash .in{font-size:20px;font-weight:800;color:#1a0004;}
+.resultbox{max-height:60vh;overflow:auto;}
+table.res{width:100%;border-collapse:collapse;font-size:13px;}
+table.res th,table.res td{padding:8px 9px;border-bottom:1px solid var(--bd);text-align:left;}
+table.res th{color:var(--tx2);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;}
+table.res td.bad{color:var(--red);font-weight:700;}
+@media(max-width:520px){.title{font-size:24px;}.qtext{font-size:18px;}}
 </style>
 </head>
 <body>
 
-<!-- ============ TEACHER / CONVERTER VIEW ============ -->
-<div id="teacherView">
+<!-- ================= TEACHER: BUILDER ================= -->
+<div id="tBuild">
 <div class="wrap">
   <div class="head">
-    <div class="kw">สำหรับครู</div>
-    <div class="title">FocusGuard<span class="dot">.</span></div>
-    <div class="sub">แปะลิงก์แบบฝึกหัด รับลิงก์ป้องกันการสลับแท็บไปใช้ AI<br>ไม่ต้องติดตั้งอะไร ใช้ได้ทุกคน ไม่จำกัดครู</div>
+    <div class="kw">FocusGuard · สำหรับครู</div>
+    <div class="title">ควิซสด<span class="dot">.</span></div>
+    <div class="sub">ทุกคนเจอคำถามเดียวกัน พร้อมกัน มีเวลาจำกัด —<br>ไม่มีเวลาเหลือให้เปิด AI หรือค้นหาคำตอบ</div>
   </div>
 
   <div class="card">
-    <h3>🔗 1. ลิงก์แบบฝึกหัด</h3>
-    <div class="field">
-      <label>วางลิงก์ Google Form หรือแบบฝึกหัดออนไลน์</label>
-      <input type="url" id="targetUrl" placeholder="https://forms.gle/...">
-      <div class="hint">ถ้าฟอร์มตั้ง "จำกัดให้ตอบได้ 1 ครั้ง" หรือบังคับให้เข้าสู่ระบบ Google ฟอร์มอาจค้างที่หน้าล็อกอินตอนฝังในกรอบ (เบราว์เซอร์บล็อกคุกกี้บุคคลที่สาม) — ปิดตัวเลือกนี้ในฟอร์มถ้าจะใช้กับ FocusGuard</div>
+    <h3>📝 1. คำถาม</h3>
+    <div id="qList"></div>
+    <button class="btn ghost" id="addQBtn">＋ เพิ่มคำถาม</button>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ 2. ตั้งค่า</h3>
+    <div class="row2">
+      <div class="field">
+        <label>เวลาต่อข้อ (วินาที)</label>
+        <input type="number" id="cfgTime" value="25" min="10" max="120" step="5">
+      </div>
+      <div class="field">
+        <label>เริ่มควิซในอีก (นาที)</label>
+        <input type="number" id="cfgDelay" value="5" min="1" max="120" step="1">
+      </div>
     </div>
     <div class="field">
-      <label>ชื่อแบบฝึกหัด (ไม่บังคับ — ช่วยให้จำง่าย)</label>
-      <input type="text" id="assignTitle" placeholder="เช่น ใบงานบทที่ 3 - Data Science">
+      <label>ชื่อควิซ</label>
+      <input type="text" id="cfgTitle" placeholder="เช่น ควิซบทที่ 3">
     </div>
-    <div id="embedWarn" class="embedstat"></div>
+    <div class="hint">นาฬิกาของมือถือทุกเครื่องตรงกันอยู่แล้ว (ซิงก์จากเครือข่ายอัตโนมัติ) ทุกคนจึงเห็นคำถามพร้อมกันโดยไม่ต้องมีเซิร์ฟเวอร์</div>
   </div>
 
-  <div class="card">
-    <details class="compat">
-      <summary>📋 เว็บไหนใช้กับ FocusGuard ได้บ้าง?</summary>
-      <div class="cols">
-        <div>
-          <h4 class="g">✅ ใช้ได้ (ทดสอบแล้ว)</h4>
-          <ul>
-            <li>Google Forms</li>
-            <li>Microsoft Forms</li>
-            <li>Kahoot</li>
-            <li>Quizizz</li>
-            <li>Wordwall</li>
-            <li>Padlet</li>
-            <li>Typeform / Jotform</li>
-            <li>Socrative</li>
-            <li>Educaplay</li>
-            <li>Desmos / GeoGebra</li>
-            <li>PhET Simulations</li>
-            <li>Scratch (ลิงก์ embed)</li>
-            <li>YouTube (ลิงก์ embed)</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="r">❌ ใช้ไม่ได้ (เว็บเขาปิดกั้นเอง)</h4>
-          <ul>
-            <li>Gemini / AI Studio</li>
-            <li>NotebookLM</li>
-            <li>Google Sites</li>
-            <li>Blooket</li>
-            <li>Liveworksheets</li>
-            <li>Nearpod</li>
-            <li>Quizlet</li>
-            <li>Mentimeter</li>
-            <li>Genially</li>
-            <li>Baamboozle</li>
-            <li>Canva</li>
-            <li>ChatGPT / Claude</li>
-          </ul>
-        </div>
-      </div>
-      <div class="hint" style="margin-top:12px">
-        เว็บกลุ่ม ❌ ส่ง header <code>X-Frame-Options</code> บอกเบราว์เซอร์ว่า "ห้ามแสดงฉันในกรอบของเว็บอื่น" เพื่อกันการถูกครอบหน้าจอหลอกลวง เบราว์เซอร์จะบล็อกตั้งแต่ก่อนโค้ดของ FocusGuard ทำงาน — ไม่มีวิธีแก้จากฝั่งเรา<br><br>
-        <b>Google Forms ที่มีคำถามอัปโหลดไฟล์</b> ก็ฝังไม่ได้เช่นกัน (Google บังคับให้ล็อกอิน และปิดกั้นการฝัง) — ถ้าจะใช้กับ FocusGuard ต้องเป็นฟอร์มที่ไม่มีอัปโหลดไฟล์ และไม่บังคับล็อกอิน
-      </div>
-    </details>
-  </div>
+  <button class="btn" id="tGenBtn">✨ สร้างลิงก์ควิซ</button>
 
-  <div class="card">
-    <h3>⚙️ 2. ตั้งกติกา</h3>
-    <div class="row3">
-      <div class="field">
-        <label>หักคะแนน/ครั้ง</label>
-        <input type="number" id="cfgPenalty" value="20" min="5" max="100" step="5">
-      </div>
-      <div class="field">
-        <label>ผ่อนผัน (วิ)</label>
-        <input type="number" id="cfgGrace" value="3" min="0" max="30" step="1">
-      </div>
-      <div class="field">
-        <label>ล็อกเมื่อครบ (ครั้ง)</label>
-        <input type="number" id="cfgMaxViol" value="3" min="1" max="10" step="1">
-      </div>
-    </div>
-    <div class="hint">"ผ่อนผัน" = สลับแท็บสั้นๆ (เช่นแตะแจ้งเตือน) ไม่นับผิด ถ้านานกว่านี้ถึงจะโดนหัก</div>
-  </div>
-
-  <button class="btn" id="genBtn">✨ สร้างลิงก์ป้องกัน</button>
-
-  <div id="resultBox">
+  <div id="tOut" style="display:none">
     <div class="card">
-      <h3>✅ ลิงก์พร้อมแล้ว</h3>
-      <div class="field">
-        <label>ลิงก์สำหรับนักเรียน</label>
-        <div class="copyrow">
-          <input type="text" id="outLink" readonly>
-          <button class="btn small ghost" id="copyLinkBtn">คัดลอก</button>
-        </div>
+      <h3>✅ แจกลิงก์นี้ให้นักเรียน</h3>
+      <div class="copyrow">
+        <input type="text" id="tLink" readonly>
+        <button class="btn small ghost" id="tCopyBtn">คัดลอก</button>
       </div>
-      <div class="qrwrap" id="qrHolder"></div>
-      <div class="pinbox">
-        <div>
-          <div class="label">รหัสปลดล็อก (เก็บไว้กับครูเท่านั้น)</div>
-          <div class="pin" id="outPin">----</div>
-        </div>
-        <button class="btn small ghost" id="copyPinBtn">คัดลอก</button>
-      </div>
-      <div class="hint" style="margin-bottom:12px">ถ้านักเรียนถูกล็อกหน้าจอ ให้ครูพิมพ์รหัสนี้ให้นักเรียนปลดล็อกเอง</div>
-      <a class="btn ghost" id="testLinkBtn" target="_blank" style="text-decoration:none;display:flex">🧪 ทดสอบลิงก์</a>
+      <div class="qrwrap" id="tQr"></div>
+      <div class="hint" id="tStartInfo" style="text-align:center;font-size:13px;color:var(--gold)"></div>
+      <a class="btn ghost" id="tProjBtn" target="_blank" style="text-decoration:none;display:flex;margin-top:10px">📺 เปิดจอครู (ฉายโปรเจกเตอร์)</a>
     </div>
   </div>
 
   <div class="card">
-    <h3>🔍 3. ตรวจรหัสยืนยันจากนักเรียน</h3>
-    <div class="field">
-      <label>วางรหัสยืนยันที่นักเรียนส่งมา</label>
-      <textarea id="decodeInput" placeholder="วางรหัสยืนยันตรงนี้..."></textarea>
+    <h3>🔍 3. ตรวจผล — วางรหัสผลของนักเรียน (คนละบรรทัด)</h3>
+    <textarea id="tDecodeIn" style="min-height:90px" placeholder="วางรหัสผลหลายคนได้ บรรทัดละคน..."></textarea>
+    <button class="btn ghost" id="tDecodeBtn" style="margin-top:10px">ถอดรหัสทั้งหมด</button>
+    <div class="resultbox" id="tDecodeOut" style="display:none;margin-top:12px"></div>
+  </div>
+
+  <div class="foot">FocusGuard Quiz — เวอร์ชันแรก ไม่ใช้เซิร์ฟเวอร์ ผลส่งกลับด้วยรหัสผลท้ายควิซ<br><a href="index.html" style="color:var(--tx2)">← กลับหน้าแปลงลิงก์</a></div>
+</div>
+</div>
+
+<!-- ================= TEACHER: PROJECTOR ================= -->
+<div id="tProj" style="display:none">
+  <div class="wrap" style="max-width:640px;text-align:center;padding-top:8vh">
+    <div class="kw">FocusGuard Quiz</div>
+    <div class="title" id="pTitle" style="margin:8px 0 20px"></div>
+    <div class="card">
+      <div id="pStatus" style="font-size:17px;color:var(--tx2)"></div>
+      <div class="bigclock" id="pClock">--:--</div>
+      <div id="pQ" style="display:none">
+        <div class="qtext" id="pQText" style="text-align:center"></div>
+        <div class="hint" id="pQNum"></div>
+      </div>
     </div>
-    <button class="btn ghost" id="decodeBtn">ถอดรหัส</button>
-    <div class="decodeResult" id="decodeResult"></div>
-  </div>
-
-  <div class="foot">
-    FocusGuard ช่วยสังเกตพฤติกรรมสลับหน้าจอระหว่างทำแบบฝึกหัดเท่านั้น<br>
-    ป้องกันการใช้อุปกรณ์เครื่องที่สองไม่ได้ — เป็นเครื่องมือช่วยสังเกต ไม่ใช่ระบบรักษาความปลอดภัยเต็มรูปแบบ<br><br>
-    เว็บ AI/แชท/บางแพลตฟอร์มฝังในกรอบไม่ได้เลย (เว็บนั้นปิดกั้นเอง) → ลอง <a href="quiz.html" style="color:var(--cyan)">ควิซสด</a> แทน — คำถามของคุณเอง ทุกคนตอบพร้อมกัน ไม่มีเวลาเปิด AI
+    <div class="foot">นักเรียนดูคำถามบนเครื่องตัวเอง — จอนี้ไว้ดูจังหวะเวลาเท่านั้น</div>
   </div>
 </div>
-</div>
 
-<!-- ============ STUDENT / WRAPPER VIEW ============ -->
-<div id="studentView">
+<!-- ================= STUDENT ================= -->
+<div id="sView" style="display:none">
 
-  <div class="sv-start" id="svStart">
-    <div class="wrap" style="max-width:480px;padding-top:0">
+  <div class="center" id="sJoin">
+    <div class="wrap" style="padding-top:0">
       <div class="head">
-        <div class="kw">FocusGuard</div>
-        <div class="title">โฟกัสการ์ด<span class="dot">.</span></div>
+        <div class="kw">FocusGuard Quiz</div>
+        <div class="title" id="sTitle">ควิซสด<span class="dot">.</span></div>
       </div>
       <div class="card">
-        <div id="svAssignTitle" style="font-size:15px;font-weight:700;margin-bottom:10px;"></div>
-        <ul class="sv-rules">
-          <li>👀 ห้ามสลับแท็บ สลับแอป หรือออกจากหน้าจอนี้ระหว่างทำ</li>
-          <li>⏱️ ออกไปสั้นๆ ไม่เป็นไร แต่ถ้านานเกินไปจะถูกหักคะแนน</li>
-          <li>🔒 ถ้าโดนหักครบตามกำหนด หน้าจอจะถูกล็อก ต้องให้ครูปลดล็อก</li>
-          <li>🎯 คะแนนและประวัติจะถูกสร้างเป็น "รหัสยืนยัน" ให้วางในคำถามสุดท้าย</li>
+        <div class="field">
+          <label>ชื่อ-เลขที่ (ให้ครูรู้ว่าใครตอบ)</label>
+          <input type="text" id="sName" placeholder="เช่น ปลื้ม เลขที่ 12" maxlength="40">
+        </div>
+        <ul style="list-style:none;font-size:13px;color:var(--tx2);line-height:1.9;margin:10px 0 14px">
+          <li>⚡ ทุกคนเห็นคำถามพร้อมกัน มีเวลาจำกัดต่อข้อ</li>
+          <li>👀 สลับแอป/แท็บระหว่างข้อ = โดนบันทึกและหักคะแนน</li>
+          <li>🏁 ตอบเร็วและถูก ได้คะแนนโบนัส</li>
         </ul>
-        <button class="btn" id="svStartBtn">🚀 เริ่มทำแบบฝึกหัด</button>
-      </div>
-      <div class="foot">อุปกรณ์เครื่องที่สองตรวจไม่ได้ — ระบบนี้ช่วยสังเกต ไม่ใช่ป้องกันการโกงแบบสมบูรณ์</div>
-    </div>
-  </div>
-
-  <div class="sv-app" id="svApp">
-    <div class="sv-bar">
-      <div class="sv-score ok" id="svScore">100</div>
-      <div class="sv-vc" id="svVc">0 ครั้ง</div>
-      <button class="btn small ghost" id="svFinishBtn">รับรหัสยืนยัน</button>
-    </div>
-    <div class="sv-frame-wrap">
-      <iframe id="svFrame" allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="sv-loadhint" id="svLoadHint">
-        ถ้าเนื้อหาไม่ขึ้น เว็บนี้อาจไม่อนุญาตให้ฝังในกรอบ — แจ้งครูให้เปิดลิงก์ต้นฉบับแทน
-        <br><button id="svOpenDirect">เปิดลิงก์ต้นฉบับในแท็บนี้</button>
+        <button class="btn" id="sJoinBtn">เข้าร่วม</button>
       </div>
     </div>
   </div>
 
-  <div class="overlay warn" id="svWarnOverlay">
-    <div>
-      <div class="oico">👀</div>
-      <div class="otitle" id="svWarnTitle">ครูเห็นนะ</div>
-      <div class="odesc" id="svWarnDesc"></div>
-    </div>
-  </div>
-
-  <div class="overlay lock" id="svLockOverlay">
-    <div class="lockcard">
-      <div class="lockico">🔒</div>
-      <h2>หน้าจอถูกล็อกแล้ว</h2>
-      <p>โดนหักคะแนนครบตามที่ครูกำหนด<br>ยกมือแจ้งครูเพื่อขอรหัสปลดล็อก</p>
-      <div class="pinentry">
-        <input type="text" id="svPinInput" inputmode="numeric" maxlength="6" placeholder="รหัสปลดล็อก">
+  <div class="center" id="sWait" style="display:none">
+    <div class="wrap" style="padding-top:0;text-align:center">
+      <div class="card">
+        <div style="font-size:15px;color:var(--tx2)">ควิซจะเริ่มใน</div>
+        <div class="bigclock" id="sCountdown">--:--</div>
+        <div class="hint">อย่าปิดหน้านี้ — คำถามแรกจะขึ้นเอง</div>
       </div>
-      <button class="btn" id="svUnlockBtn">ปลดล็อก</button>
     </div>
   </div>
 
-  <div class="modal-bg" id="svCodeModalBg">
-    <div class="modal">
-      <button class="close" id="svCodeClose">✕</button>
-      <h3>🎯 รหัสยืนยันของคุณ</h3>
-      <p>คัดลอกรหัสนี้ไปวางในช่องคำถามสุดท้ายของแบบฝึกหัด</p>
-      <textarea id="svCodeOut" readonly style="min-height:110px"></textarea>
-      <button class="btn" id="svCodeCopyBtn" style="margin-top:10px">คัดลอกรหัส</button>
+  <div class="wrap qview" id="sQuiz" style="display:none">
+    <div class="qbar">
+      <span id="sQNum">ข้อ 1</span>
+      <span id="sViol" style="color:var(--red)"></span>
+      <span class="score" id="sScore">0</span>
+    </div>
+    <div class="timerbar"><i id="sTimer" style="width:100%"></i></div>
+    <div class="qtext" id="sQText"></div>
+    <div class="ans" id="sAns"></div>
+    <div class="betweenq" id="sBetween" style="display:none"></div>
+  </div>
+
+  <div class="center" id="sDone" style="display:none">
+    <div class="wrap" style="padding-top:0">
+      <div class="card" style="text-align:center">
+        <div style="font-size:44px">🏁</div>
+        <h3 style="justify-content:center;font-size:19px;margin:8px 0">จบควิซแล้ว!</h3>
+        <div style="font-size:34px;font-weight:800;color:var(--gold);font-family:ui-monospace,monospace" id="sFinalScore">0</div>
+        <div class="hint" id="sFinalDetail" style="margin-bottom:14px"></div>
+        <div class="field">
+          <label style="text-align:left">รหัสผล — ส่งให้ครูตามที่ครูสั่ง (เช่น วางในแชท/ฟอร์มเก็บผล)</label>
+          <textarea id="sCode" readonly style="min-height:90px;font-family:ui-monospace,monospace;font-size:11.5px"></textarea>
+        </div>
+        <button class="btn" id="sCopyBtn">คัดลอกรหัสผล</button>
+      </div>
     </div>
   </div>
 
-  <div class="errpage" id="svErr" style="display:none">
-    <div class="card">
-      <h3>⚠️ ลิงก์ไม่ถูกต้อง</h3>
-      <p style="color:var(--tx2);font-size:13.5px;line-height:1.6">ลิงก์นี้อาจถูกแก้ไขหรือเสียหาย ลองขอลิงก์ใหม่จากครูอีกครั้ง</p>
-    </div>
-  </div>
-
+  <div class="flash" id="sFlash"><div class="in">👀 ครูเห็นนะ!<br><span id="sFlashDetail" style="font-size:14px"></span></div></div>
 </div>
 
-<!-- ============ vendored: kazuhikoarase/qrcode-generator (MIT) ============ -->
+<!-- vendored: kazuhikoarase/qrcode-generator (MIT) -->
 <script>
-//---------------------------------------------------------------------
-//
-// QR Code Generator for JavaScript
-//
-// Copyright (c) 2009 Kazuhiko Arase
-//
-// URL: http://www.d-project.com/
-//
-// Licensed under the MIT license:
-//  http://www.opensource.org/licenses/mit-license.php
-//
-// The word 'QR Code' is registered trademark of
-// DENSO WAVE INCORPORATED
-//  http://www.denso-wave.com/qrcode/faqpatent-e.html
-//
-//---------------------------------------------------------------------
 var qrcode = function() {
 
   //---------------------------------------------------------------------
@@ -2678,370 +2525,314 @@ var qrcode = function() {
 </script>
 
 <script>
-/* ============ shared helpers ============ */
-function b64url(str){
-  return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-}
-function unb64url(str){
-  str=str.replace(/-/g,'+').replace(/_/g,'/');
-  while(str.length%4)str+='=';
-  return decodeURIComponent(escape(atob(str)));
-}
-function fghash(str){
-  var h=5381;
-  for(var i=0;i<str.length;i++){h=((h<<5)+h+str.charCodeAt(i))|0;}
-  return (h>>>0).toString(36);
-}
-function fmtSec(s){
-  s=Math.round(s);
-  if(s<60)return s+' วิ';
-  return Math.floor(s/60)+' นาที '+(s%60)+' วิ';
-}
-
-function normalizeTarget(url){
-  try{
-    var u=new URL(url);
-    var h=u.hostname.replace(/^www\./,'');
-    if(h==='docs.google.com'&&/^\/forms\//.test(u.pathname)&&!u.searchParams.has('embedded')){
-      u.searchParams.set('embedded','true');
-      return u.toString();
-    }
-  }catch(e){}
-  return url;
-}
-
-/* Verified by checking live X-Frame-Options / CSP frame-ancestors headers, 2026-07-10.
-   Re-test if a platform starts white-screening. */
-var PLATFORM_OK=['forms.gle','forms.office.com','kahoot.it','quizizz.com','wordwall.net',
-  'padlet.com','typeform.com','jotform.com','socrative.com','educaplay.com','desmos.com',
-  'phet.colorado.edu','scratch.mit.edu','geogebra.org','youtube.com','youtube-nocookie.com'];
-
-var PLATFORM_BLOCKED={
-  'gemini.google.com':'Gemini ปิดกั้นการฝังในกรอบ (X-Frame-Options: DENY) — รวมถึงลิงก์แชร์ /share/ ด้วย',
-  'aistudio.google.com':'Google AI Studio ปิดกั้นการฝังในกรอบ',
-  'notebooklm.google.com':'NotebookLM ปิดกั้นการฝังในกรอบ',
-  'labs.google':'Google Labs ปิดกั้นการฝังในกรอบ',
-  'accounts.google.com':'หน้าเข้าสู่ระบบ Google ฝังไม่ได้',
-  'sites.google.com':'Google Sites ปิดกั้นการฝังในกรอบ',
-  'blooket.com':'Blooket ปิดกั้นการฝังในกรอบ',
-  'liveworksheets.com':'Liveworksheets ปิดกั้นการฝังในกรอบ',
-  'nearpod.com':'Nearpod ปิดกั้นการฝังในกรอบ',
-  'quizlet.com':'Quizlet ปิดกั้นการฝังในกรอบ',
-  'mentimeter.com':'Mentimeter ปิดกั้นการฝังในกรอบ',
-  'menti.com':'Mentimeter ปิดกั้นการฝังในกรอบ',
-  'genially.com':'Genially ปิดกั้นการฝังในกรอบ',
-  'baamboozle.com':'Baamboozle ปิดกั้นการฝังในกรอบ',
-  'canva.com':'Canva ปิดกั้นการฝังในกรอบ',
-  'claude.ai':'Claude ปิดกั้นการฝังในกรอบ',
-  'chatgpt.com':'ChatGPT ปิดกั้นการฝังในกรอบ',
-  'chat.openai.com':'ChatGPT ปิดกั้นการฝังในกรอบ'
-};
-
-function hostOf(url){
-  try{return new URL(url).hostname.replace(/^www\./,'').toLowerCase();}catch(e){return '';}
-}
-function hostMatches(h,d){return h===d||h.endsWith('.'+d);}
-
-/* returns {level:'ok'|'blocked'|'unknown', msg:string} */
-function checkEmbeddable(url){
-  var h=hostOf(url);
-  if(!h)return{level:'unknown',msg:''};
-
-  if(h==='docs.google.com'){
-    if(/\/forms\//.test(url))return{level:'ok',msg:'Google Forms — ใช้กับ FocusGuard ได้ ✅'};
-    if(/\/pub\b/.test(url))return{level:'ok',msg:'ลิงก์เผยแพร่ของ Google — ใช้ได้ ✅'};
-    return{level:'blocked',msg:'ลิงก์ Google Docs/Slides/Sheets แบบแก้ไข ฝังไม่ได้ — ใช้เมนู ไฟล์ › แชร์ › เผยแพร่ลงเว็บ แล้วนำลิงก์ที่ลงท้าย /pub มาใช้แทน'};
-  }
-  for(var d in PLATFORM_BLOCKED){
-    if(hostMatches(h,d))return{level:'blocked',msg:PLATFORM_BLOCKED[d]};
-  }
-  for(var i=0;i<PLATFORM_OK.length;i++){
-    if(hostMatches(h,PLATFORM_OK[i]))return{level:'ok',msg:'แพลตฟอร์มนี้ทดสอบแล้ว ใช้กับ FocusGuard ได้ ✅'};
-  }
-  return{level:'unknown',msg:'ยังไม่เคยทดสอบเว็บนี้ — กด "ทดสอบลิงก์" ดูก่อนแจกให้นักเรียน ถ้าขึ้นจอขาวแปลว่าฝังไม่ได้'};
+/* ---------- shared ---------- */
+function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function unb64url(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
+function fghash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))|0;}return(h>>>0).toString(36);}
+function pad2(n){return (n<10?'0':'')+n;}
+function fmtClock(ms){
+  var s=Math.max(0,Math.ceil(ms/1000));
+  return pad2(Math.floor(s/60))+':'+pad2(s%60);
 }
 
 var params=new URLSearchParams(location.search);
-var tParam=params.get('t');
+var qParam=params.get('q');
+var mode=params.get('m');
 
-if(tParam){
-  document.getElementById('teacherView').style.display='none';
-  initStudentMode();
-}else{
-  initTeacherMode();
+if(qParam&&mode==='p'){initProjector();}
+else if(qParam){initStudent();}
+else{initBuilder();}
+
+/* ---------- quiz payload ----------
+   {ti,tq (sec/question),st (epoch ms),qs:[{t,c:[..],a}]}  */
+function loadQuiz(){
+  try{
+    var qz=JSON.parse(unb64url(qParam));
+    if(!qz.qs||!qz.qs.length||!qz.st||!qz.tq)throw 0;
+    return qz;
+  }catch(e){return null;}
+}
+/* gap between questions (reveal answer) */
+var GAP=4000;
+function slotAt(qz,now){
+  var per=qz.tq*1000+GAP;
+  var el=now-qz.st;
+  if(el<0)return{phase:'wait',left:-el};
+  var idx=Math.floor(el/per);
+  if(idx>=qz.qs.length)return{phase:'done'};
+  var inQ=el-idx*per;
+  if(inQ<qz.tq*1000)return{phase:'q',idx:idx,left:qz.tq*1000-inQ};
+  return{phase:'gap',idx:idx,left:per-inQ};
 }
 
-/* ============ TEACHER MODE ============ */
-function initTeacherMode(){
-  var genBtn=document.getElementById('genBtn');
-  genBtn.addEventListener('click',function(){
-    var target=document.getElementById('targetUrl').value.trim();
-    if(!target){alert('ใส่ลิงก์แบบฝึกหัดก่อนนะ');return;}
-    if(!/^https?:\/\//i.test(target)){alert('ลิงก์ต้องขึ้นต้นด้วย http:// หรือ https://');return;}
-    target=normalizeTarget(target);
+/* ================= BUILDER ================= */
+function initBuilder(){
+  document.getElementById('tBuild').style.display='block';
+  var qList=document.getElementById('qList');
 
-    var warnBox=document.getElementById('embedWarn');
-    var st=checkEmbeddable(target);
-    warnBox.style.display='block';
-    warnBox.className='embedstat '+st.level;
-    if(st.level==='blocked'){
-      warnBox.innerHTML='<b>❌ เว็บนี้ใช้กับ FocusGuard ไม่ได้</b><br>'+st.msg+
-        '<br><span style="opacity:.85">นักเรียนจะเห็นจอขาว เพราะเว็บนั้นสั่งไม่ให้เบราว์เซอร์แสดงผลในกรอบ (กันการถูกครอบหน้าจอ) — แก้จากฝั่งเราไม่ได้</span>';
-    }else if(st.level==='ok'){
-      warnBox.innerHTML='<b>✅ ใช้ได้</b> '+st.msg;
-    }else{
-      warnBox.innerHTML='<b>❓ ไม่แน่ใจ</b><br>'+st.msg;
-    }
+  function addQ(){
+    var n=qList.children.length;
+    if(n>=20){alert('สูงสุด 20 ข้อ (ลิงก์จะยาวเกิน)');return;}
+    var div=document.createElement('div');
+    div.className='qitem';
+    var groupName='cor'+n+'_'+Date.now();
+    div.innerHTML=
+      '<div class="qtop"><span class="qnum">ข้อ '+(n+1)+'</span>'+
+      '<button class="del" title="ลบข้อนี้">✕</button></div>'+
+      '<input type="text" class="qt" placeholder="คำถาม..." maxlength="200">'+
+      [0,1,2,3].map(function(i){
+        return '<div class="choice"><input type="radio" name="'+groupName+'" '+(i===0?'checked':'')+
+          ' title="ข้อถูก"><input type="text" class="ch" placeholder="ตัวเลือก '+(i+1)+(i>1?' (เว้นว่างได้)':'')+'" maxlength="100"></div>';
+      }).join('');
+    div.querySelector('.del').addEventListener('click',function(){
+      div.remove();renumber();
+    });
+    qList.appendChild(div);
+  }
+  function renumber(){
+    Array.prototype.forEach.call(qList.children,function(d,i){
+      d.querySelector('.qnum').textContent='ข้อ '+(i+1);
+    });
+  }
+  document.getElementById('addQBtn').addEventListener('click',addQ);
+  addQ();addQ();addQ();
 
-    var title=document.getElementById('assignTitle').value.trim();
-    var penalty=Math.max(1,parseInt(document.getElementById('cfgPenalty').value)||20);
-    var grace=Math.max(0,parseInt(document.getElementById('cfgGrace').value)||3);
-    var maxViol=Math.max(1,parseInt(document.getElementById('cfgMaxViol').value)||3);
-    var pin=String(Math.floor(1000+Math.random()*9000));
-    var pinHash=fghash(pin);
+  document.getElementById('tGenBtn').addEventListener('click',function(){
+    var qs=[];
+    var bad=false;
+    Array.prototype.forEach.call(qList.children,function(d){
+      var t=d.querySelector('.qt').value.trim();
+      var chs=Array.prototype.map.call(d.querySelectorAll('.ch'),function(c){return c.value.trim();});
+      var radios=d.querySelectorAll('input[type=radio]');
+      var a=0;
+      radios.forEach(function(r,i){if(r.checked)a=i;});
+      var c=chs.filter(function(x){return x;});
+      if(!t)return; // skip empty question rows
+      if(c.length<2){bad=true;return;}
+      // answer index must map into the filtered list
+      var kept=[],ansIdx=0;
+      chs.forEach(function(x,i){
+        if(x){kept.push(x);if(i===a)ansIdx=kept.length-1;}
+      });
+      qs.push({t:t,c:kept,a:ansIdx});
+    });
+    if(bad){alert('ทุกข้อต้องมีตัวเลือกอย่างน้อย 2 ตัวเลือก');return;}
+    if(!qs.length){alert('ใส่คำถามอย่างน้อย 1 ข้อก่อนนะ');return;}
 
-    var cfg={p:penalty,g:grace,m:maxViol,ph:pinHash,ti:title};
-    var link=location.origin+location.pathname+
-      '?t='+b64url(target)+
-      '&c='+b64url(JSON.stringify(cfg));
+    var tq=Math.min(120,Math.max(10,parseInt(document.getElementById('cfgTime').value)||25));
+    var delayMin=Math.min(120,Math.max(1,parseInt(document.getElementById('cfgDelay').value)||5));
+    var st=Date.now()+delayMin*60000;
+    var qz={ti:document.getElementById('cfgTitle').value.trim()||'ควิซสด',tq:tq,st:st,qs:qs};
 
-    document.getElementById('outLink').value=link;
-    document.getElementById('outPin').textContent=pin;
-    document.getElementById('testLinkBtn').href=link;
+    var payload=b64url(JSON.stringify(qz));
+    var link=location.origin+location.pathname+'?q='+payload;
+    if(link.length>7500){alert('คำถามเยอะ/ยาวเกินไป ลิงก์ยาวเกินขีดจำกัด — ลดจำนวนข้อหรือย่อข้อความ');return;}
 
-    var qrHolder=document.getElementById('qrHolder');
+    document.getElementById('tLink').value=link;
+    var startD=new Date(st);
+    document.getElementById('tStartInfo').textContent=
+      '⏰ ควิซเริ่มเวลา '+pad2(startD.getHours())+':'+pad2(startD.getMinutes())+' น. ('+delayMin+' นาทีจากตอนนี้) · '+qs.length+' ข้อ · ข้อละ '+tq+' วิ';
+    document.getElementById('tProjBtn').href=link+'&m=p';
+
+    var qrHolder=document.getElementById('tQr');
     qrHolder.innerHTML='';
     try{
-      var qr=qrcode(0,'M');
+      var qr=qrcode(0,'L');
       qr.addData(link);
       qr.make();
-      qrHolder.innerHTML=qr.createSvgTag(4,8);
+      qrHolder.innerHTML=qr.createSvgTag(3,6);
     }catch(e){
-      qrHolder.innerHTML='<div style="color:#333;font-size:12px;padding:20px">ลิงก์ยาวเกินสร้าง QR ไม่ได้ — ใช้ปุ่มคัดลอกแทน</div>';
+      qrHolder.innerHTML='<div style="color:#333;font-size:12px;padding:16px">ลิงก์ยาวเกินสร้าง QR — ใช้ปุ่มคัดลอกแทน</div>';
     }
-
-    document.getElementById('resultBox').style.display='block';
-    document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'start'});
+    document.getElementById('tOut').style.display='block';
+    document.getElementById('tOut').scrollIntoView({behavior:'smooth'});
   });
 
-  document.getElementById('copyLinkBtn').addEventListener('click',function(){
-    copyText(document.getElementById('outLink').value,this);
-  });
-  document.getElementById('copyPinBtn').addEventListener('click',function(){
-    copyText(document.getElementById('outPin').textContent,this);
+  document.getElementById('tCopyBtn').addEventListener('click',function(){
+    copyText(document.getElementById('tLink').value,this);
   });
 
-  document.getElementById('decodeBtn').addEventListener('click',function(){
-    var raw=document.getElementById('decodeInput').value.trim();
-    var box=document.getElementById('decodeResult');
-    if(!raw){box.style.display='none';return;}
-    var parsed=decodeIntegrityCode(raw);
-    if(!parsed){
-      box.style.display='block';
-      box.innerHTML='<div style="color:var(--red);font-weight:700">ถอดรหัสไม่ได้ — รหัสอาจไม่ครบหรือถูกแก้ไข</div>';
-      return;
-    }
-    var d=parsed.data;
-    var durationMin=Math.round((d.et-d.st)/60000);
-    var html='';
-    html+='<div class="vline"><span>ผลตรวจสอบ</span><b style="color:'+(parsed.valid?'var(--green)':'var(--red)')+'">'+(parsed.valid?'✅ ผ่าน — ไม่ถูกแก้ไข':'⚠️ ไม่ผ่าน — อาจถูกแก้ไข')+'</b></div>';
-    html+='<div class="vline"><span>คะแนนสุดท้าย</span><b>'+d.s+' / 100</b></div>';
-    html+='<div class="vline"><span>จำนวนครั้งที่สลับหน้าจอ</span><b>'+d.vc+' ครั้ง</b></div>';
-    html+='<div class="vline"><span>ถูกล็อกหน้าจอ</span><b>'+(d.lk>0?d.lk+' ครั้ง':'ไม่โดน')+'</b></div>';
-    html+='<div class="vline"><span>ใช้เวลาทำทั้งหมด</span><b>~'+durationMin+' นาที</b></div>';
-    if(d.viol&&d.viol.length){
-      html+='<div style="margin-top:8px;font-size:12px;color:var(--tx2)">รายละเอียดการสลับหน้าจอ:</div>';
-      d.viol.forEach(function(v,i){
-        var typeLabel=v[2]===1?'ออกจากโหมดเต็มจอ':'สลับแท็บ/แอป';
-        html+='<div class="vline"><span>ครั้งที่ '+(i+1)+' — นาทีที่ '+Math.floor(v[0]/60)+'</span><b>'+typeLabel+(v[1]>0?' ('+fmtSec(v[1])+')':'')+'</b></div>';
-      });
-    }
-    box.innerHTML=html;
-    box.style.display='block';
+  document.getElementById('tDecodeBtn').addEventListener('click',function(){
+    var lines=document.getElementById('tDecodeIn').value.trim().split(/\s+/).filter(function(x){return x.length>10;});
+    var out=document.getElementById('tDecodeOut');
+    if(!lines.length){out.style.display='none';return;}
+    var rows=lines.map(function(line){
+      var parts=line.trim().split('.');
+      if(parts.length<2)return null;
+      var check=parts.pop(),b64=parts.join('.');
+      var valid=fghash(b64)===check;
+      try{
+        var d=JSON.parse(unb64url(b64));
+        return{n:d.n||'?',sc:d.sc,cor:d.cor,tot:d.tot,vc:(d.v||[]).length,valid:valid};
+      }catch(e){return null;}
+    });
+    var html='<table class="res"><tr><th>ชื่อ</th><th>คะแนน</th><th>ถูก</th><th>สลับจอ</th><th>ตรวจสอบ</th></tr>';
+    rows.forEach(function(r){
+      if(!r){html+='<tr><td colspan="5" class="bad">รหัสเสีย/ไม่ครบ</td></tr>';return;}
+      html+='<tr><td>'+escHtml(r.n)+'</td><td>'+r.sc+'</td><td>'+r.cor+'/'+r.tot+'</td>'+
+        '<td class="'+(r.vc>0?'bad':'')+'">'+(r.vc>0?r.vc+' ครั้ง':'—')+'</td>'+
+        '<td>'+(r.valid?'✅':'<span class="bad">⚠️ ถูกแก้ไข</span>')+'</td></tr>';
+    });
+    html+='</table>';
+    out.innerHTML=html;
+    out.style.display='block';
   });
 }
-
+function escHtml(s){return String(s).replace(/[<>&"]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
 function copyText(text,btn){
   navigator.clipboard.writeText(text).then(function(){
-    var orig=btn.textContent;
-    btn.textContent='คัดลอกแล้ว ✓';
-    setTimeout(function(){btn.textContent=orig;},1500);
-  }).catch(function(){
-    alert(text);
-  });
+    var o=btn.textContent;btn.textContent='คัดลอกแล้ว ✓';
+    setTimeout(function(){btn.textContent=o;},1500);
+  }).catch(function(){alert(text);});
 }
 
-function decodeIntegrityCode(raw){
-  var parts=raw.trim().split('.');
-  if(parts.length<2)return null;
-  var check=parts.pop();
-  var b64=parts.join('.');
-  var valid=(fghash(b64)===check);
-  try{
-    var json=unb64url(b64);
-    var data=JSON.parse(json);
-    return {valid:valid,data:data};
-  }catch(e){
-    return null;
-  }
+/* ================= PROJECTOR ================= */
+function initProjector(){
+  var qz=loadQuiz();
+  document.getElementById('tBuild').style.display='none';
+  document.getElementById('tProj').style.display='block';
+  if(!qz){document.getElementById('pStatus').textContent='ลิงก์เสีย';return;}
+  document.getElementById('pTitle').textContent=qz.ti;
+  setInterval(function(){
+    var s=slotAt(qz,Date.now());
+    var st=document.getElementById('pStatus'),ck=document.getElementById('pClock'),pq=document.getElementById('pQ');
+    if(s.phase==='wait'){
+      st.textContent='ควิซจะเริ่มใน';ck.textContent=fmtClock(s.left);pq.style.display='none';
+    }else if(s.phase==='q'){
+      st.textContent='';ck.textContent=fmtClock(s.left);pq.style.display='block';
+      document.getElementById('pQText').textContent=qz.qs[s.idx].t;
+      document.getElementById('pQNum').textContent='ข้อ '+(s.idx+1)+' / '+qz.qs.length;
+    }else if(s.phase==='gap'){
+      st.textContent='เฉลย — ข้อต่อไปกำลังมา';ck.textContent=fmtClock(s.left);
+    }else{
+      st.textContent='🏁 จบควิซแล้ว — ให้นักเรียนส่งรหัสผล';ck.textContent='';pq.style.display='none';
+    }
+  },200);
 }
 
-/* ============ STUDENT MODE ============ */
-function initStudentMode(){
-  document.getElementById('studentView').style.display='block';
-
-  var target,cfg;
-  try{
-    target=unb64url(tParam);
-    cfg=JSON.parse(unb64url(params.get('c')));
-    if(!/^https?:\/\//i.test(target))throw new Error('bad url');
-  }catch(e){
-    document.getElementById('svStart').style.display='none';
-    document.getElementById('svErr').style.display='block';
+/* ================= STUDENT ================= */
+function initStudent(){
+  var qz=loadQuiz();
+  document.getElementById('sView').style.display='block';
+  if(!qz){
+    document.getElementById('sJoin').innerHTML='<div class="wrap"><div class="card"><h3>⚠️ ลิงก์ไม่ถูกต้อง</h3><p style="color:var(--tx2);font-size:13px">ขอลิงก์ใหม่จากครูนะ</p></div></div>';
     return;
   }
+  document.getElementById('sTitle').innerHTML=escHtml(qz.ti)+'<span class="dot">.</span>';
 
-  document.getElementById('svAssignTitle').textContent=cfg.ti?cfg.ti:'แบบฝึกหัด';
+  var name='',score=0,correct=0,answers=[],violations=[];
+  var answered={},hideStart=null,curIdx=-1,joined=false;
+  qz.qs.forEach(function(){answers.push(-1);});
 
-  var score=100, violCount=0, lockCount=0, violations=[];
-  var startTime=null, hideStart=null, hadFullscreen=false, locked=false, started=false;
-
-  document.getElementById('svStartBtn').addEventListener('click',function(){
-    started=true;
-    startTime=Date.now();
-    document.getElementById('svStart').style.display='none';
-    var app=document.getElementById('svApp');
-    app.style.display='flex';
-    document.getElementById('svFrame').src=target;
-
-    // If we already know this host refuses framing, don't make the student stare at white.
-    if(checkEmbeddable(target).level==='blocked'){
-      document.getElementById('svLoadHint').style.display='block';
-    }else{
-      var loadHintTimer=setTimeout(function(){
-        document.getElementById('svLoadHint').style.display='block';
-      },4500);
-      document.getElementById('svFrame').addEventListener('load',function(){
-        clearTimeout(loadHintTimer);
-      },{once:true});
-    }
-
+  document.getElementById('sJoinBtn').addEventListener('click',function(){
+    name=document.getElementById('sName').value.trim();
+    if(!name){alert('ใส่ชื่อก่อนนะ จะได้รู้ว่าใครตอบ');return;}
+    joined=true;
+    document.getElementById('sJoin').style.display='none';
     var fsEl=document.documentElement;
-    var req=fsEl.requestFullscreen||fsEl.webkitRequestFullscreen||fsEl.mozRequestFullScreen;
-    if(req){
-      try{
-        var p=req.call(fsEl);
-        if(p&&p.then){p.then(function(){hadFullscreen=true;}).catch(function(){});}
-        else{hadFullscreen=true;}
-      }catch(e){}
-    }
-
-    attachMonitoring();
+    var req=fsEl.requestFullscreen||fsEl.webkitRequestFullscreen;
+    if(req){try{var p=req.call(fsEl);if(p&&p.catch)p.catch(function(){});}catch(e){}}
+    tick();
+    setInterval(tick,200);
   });
 
-  document.getElementById('svOpenDirect').addEventListener('click',function(){
-    location.href=target;
-  });
-
-  function attachMonitoring(){
-    document.addEventListener('visibilitychange',function(){
-      if(!started||locked)return;
-      if(document.hidden){
-        hideStart=performance.now();
-      }else if(hideStart!==null){
-        var dur=(performance.now()-hideStart)/1000;
-        hideStart=null;
-        if(dur>=cfg.g){
-          registerViolation(0,dur);
-        }
+  document.addEventListener('visibilitychange',function(){
+    if(!joined)return;
+    var s=slotAt(qz,Date.now());
+    if(s.phase==='done'||s.phase==='wait')return;
+    if(document.hidden){hideStart=performance.now();}
+    else if(hideStart!==null){
+      var dur=(performance.now()-hideStart)/1000;
+      hideStart=null;
+      if(dur>=1){
+        violations.push([s.idx!==undefined?s.idx:curIdx,Math.round(dur)]);
+        score=Math.max(0,score-50);
+        document.getElementById('sViol').textContent='👀 '+violations.length;
+        var f=document.getElementById('sFlash');
+        document.getElementById('sFlashDetail').textContent='หายไป '+Math.round(dur)+' วิ · -50 คะแนน';
+        f.style.display='flex';
+        setTimeout(function(){f.style.display='none';},2200);
+        updScore();
       }
-    });
-    ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange'].forEach(function(ev){
-      document.addEventListener(ev,function(){
-        if(!started||locked||!hadFullscreen)return;
-        var fsNow=document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement;
-        if(!fsNow){
-          registerViolation(1,0);
+    }
+  });
+
+  function updScore(){document.getElementById('sScore').textContent=score;}
+
+  function renderQ(idx){
+    curIdx=idx;
+    document.getElementById('sQNum').textContent='ข้อ '+(idx+1)+' / '+qz.qs.length;
+    document.getElementById('sQText').textContent=qz.qs[idx].t;
+    document.getElementById('sBetween').style.display='none';
+    var ans=document.getElementById('sAns');
+    ans.style.display='grid';
+    ans.innerHTML='';
+    qz.qs[idx].c.forEach(function(c,i){
+      var b=document.createElement('button');
+      b.textContent=c;
+      b.addEventListener('click',function(){
+        if(answered[idx]!==undefined)return;
+        answered[idx]=true;
+        answers[idx]=i;
+        var s=slotAt(qz,Date.now());
+        Array.prototype.forEach.call(ans.children,function(x){x.disabled=true;});
+        b.classList.add('sel');
+        if(i===qz.qs[idx].a){
+          correct++;
+          var bonus=s.phase==='q'?Math.round(50*(s.left/(qz.tq*1000))):0;
+          score+=100+bonus;
+          updScore();
         }
       });
+      ans.appendChild(b);
     });
   }
 
-  function registerViolation(type,dur){
-    if(locked)return;
-    violations.push([Math.round((Date.now()-startTime)/1000),Math.round(dur),type]);
-    score=Math.max(0,score-cfg.p);
-    violCount++;
-    updateScoreUI();
-    showWarn(type,dur);
-    if(violCount>=cfg.m||score<=0){
-      lock();
+  function revealQ(idx){
+    var ans=document.getElementById('sAns');
+    Array.prototype.forEach.call(ans.children,function(b,i){
+      b.disabled=true;
+      if(i===qz.qs[idx].a)b.classList.add('correct');
+      else if(answers[idx]===i)b.classList.add('wrong');
+    });
+  }
+
+  var lastPhase='',lastIdx=-1,revealed={};
+  function tick(){
+    var now=Date.now();
+    var s=slotAt(qz,now);
+    if(s.phase==='wait'){
+      document.getElementById('sWait').style.display='block';
+      document.getElementById('sQuiz').style.display='none';
+      document.getElementById('sCountdown').textContent=fmtClock(s.left);
+    }else if(s.phase==='q'){
+      document.getElementById('sWait').style.display='none';
+      document.getElementById('sQuiz').style.display='block';
+      if(lastIdx!==s.idx){renderQ(s.idx);lastIdx=s.idx;}
+      document.getElementById('sTimer').style.width=(100*s.left/(qz.tq*1000))+'%';
+    }else if(s.phase==='gap'){
+      if(!revealed[s.idx]&&lastIdx===s.idx){revealed[s.idx]=true;revealQ(s.idx);}
+      document.getElementById('sTimer').style.width='0%';
+    }else if(s.phase==='done'&&lastPhase!=='done'){
+      finish();
     }
+    lastPhase=s.phase;
   }
 
-  function updateScoreUI(){
-    var el=document.getElementById('svScore');
-    el.textContent=score;
-    el.className='sv-score '+(score>=70?'ok':score>=35?'warn':'bad');
-    document.getElementById('svVc').textContent=violCount+' ครั้ง';
-  }
-
-  function showWarn(type,dur){
-    var title=document.getElementById('svWarnTitle');
-    var desc=document.getElementById('svWarnDesc');
-    if(type===1){
-      title.textContent='ออกจากโหมดเต็มจอ 👀';
-      desc.textContent='ครั้งที่ '+violCount+'/'+cfg.m+' — คะแนนเหลือ '+score;
-    }else{
-      title.textContent='ครูเห็นนะ 👀';
-      desc.textContent='ออกจากหน้าจอไป '+fmtSec(dur)+' (ครั้งที่ '+violCount+'/'+cfg.m+') — คะแนนเหลือ '+score;
-    }
-    var ov=document.getElementById('svWarnOverlay');
-    ov.style.display='flex';
-    setTimeout(function(){ov.style.display='none';},2800);
-  }
-
-  function lock(){
-    locked=true;
-    document.getElementById('svLockOverlay').style.display='flex';
-  }
-
-  document.getElementById('svUnlockBtn').addEventListener('click',function(){
-    var input=document.getElementById('svPinInput');
-    if(fghash(input.value.trim())===cfg.ph){
-      lockCount++;
-      locked=false;
-      input.value='';
-      document.getElementById('svLockOverlay').style.display='none';
-    }else{
-      var card=document.querySelector('#svLockOverlay .lockcard');
-      card.classList.remove('shake');
-      void card.offsetWidth;
-      card.classList.add('shake');
-    }
-  });
-
-  document.getElementById('svFinishBtn').addEventListener('click',function(){
-    var payload={
-      v:1,
-      th:fghash(target),
-      s:score,
-      vc:violCount,
-      lk:lockCount,
-      viol:violations,
-      st:startTime||Date.now(),
-      et:Date.now()
-    };
+  function finish(){
+    document.getElementById('sWait').style.display='none';
+    document.getElementById('sQuiz').style.display='none';
+    document.getElementById('sDone').style.display='block';
+    document.getElementById('sFinalScore').textContent=score;
+    document.getElementById('sFinalDetail').textContent=
+      'ถูก '+correct+' / '+qz.qs.length+' ข้อ'+(violations.length?' · สลับจอ '+violations.length+' ครั้ง':' · ไม่สลับจอเลย เก่งมาก 💯');
+    var payload={n:name,sc:score,cor:correct,tot:qz.qs.length,ans:answers,v:violations,qh:fghash(qParam),ts:Date.now()};
     var b64=b64url(JSON.stringify(payload));
-    var code=b64+'.'+fghash(b64);
-    document.getElementById('svCodeOut').value=code;
-    document.getElementById('svCodeModalBg').style.display='flex';
-  });
-  document.getElementById('svCodeClose').addEventListener('click',function(){
-    document.getElementById('svCodeModalBg').style.display='none';
-  });
-  document.getElementById('svCodeCopyBtn').addEventListener('click',function(){
-    copyText(document.getElementById('svCodeOut').value,this);
+    document.getElementById('sCode').value=b64+'.'+fghash(b64);
+  }
+
+  document.getElementById('sCopyBtn').addEventListener('click',function(){
+    copyText(document.getElementById('sCode').value,this);
   });
 }
 </script>
