@@ -163,11 +163,13 @@ textarea{resize:vertical;min-height:70px;font-family:ui-monospace,Consolas,monos
     <div class="field">
       <label>วางลิงก์ Google Form หรือแบบฝึกหัดออนไลน์</label>
       <input type="url" id="targetUrl" placeholder="https://forms.gle/...">
+      <div class="hint">ถ้าฟอร์มตั้ง "จำกัดให้ตอบได้ 1 ครั้ง" หรือบังคับให้เข้าสู่ระบบ Google ฟอร์มอาจค้างที่หน้าล็อกอินตอนฝังในกรอบ (เบราว์เซอร์บล็อกคุกกี้บุคคลที่สาม) — ปิดตัวเลือกนี้ในฟอร์มถ้าจะใช้กับ FocusGuard</div>
     </div>
     <div class="field">
       <label>ชื่อแบบฝึกหัด (ไม่บังคับ — ช่วยให้จำง่าย)</label>
       <input type="text" id="assignTitle" placeholder="เช่น ใบงานบทที่ 3 - Data Science">
     </div>
+    <div class="hint" id="embedWarn" style="display:none;color:var(--gold);font-weight:600;margin-top:2px"></div>
   </div>
 
   <div class="card">
@@ -2630,6 +2632,36 @@ function fmtSec(s){
   return Math.floor(s/60)+' นาที '+(s%60)+' วิ';
 }
 
+function normalizeTarget(url){
+  try{
+    var u=new URL(url);
+    var h=u.hostname.replace(/^www\./,'');
+    if(h==='docs.google.com'&&/^\/forms\//.test(u.pathname)&&!u.searchParams.has('embedded')){
+      u.searchParams.set('embedded','true');
+      return u.toString();
+    }
+  }catch(e){}
+  return url;
+}
+
+function checkKnownUnembeddable(url){
+  var h;
+  try{h=new URL(url).hostname.replace(/^www\./,'');}catch(e){return null;}
+  var blockedHosts=['aistudio.google.com','labs.google','gemini.google.com','notebooklm.google.com',
+    'accounts.google.com','sites.google.com','docs.google.com/presentation','claude.ai','chat.openai.com','chatgpt.com'];
+  var isFormsOk=/^docs\.google\.com$/.test(h)&&/\/forms\//.test(url);
+  if(isFormsOk)return null;
+  for(var i=0;i<blockedHosts.length;i++){
+    if(h===blockedHosts[i]||h.endsWith('.'+blockedHosts[i])){
+      return 'เว็บนี้ ('+h+') น่าจะไม่ยอมให้ฝังในกรอบ (ป้องกัน clickjacking) — FocusGuard อาจขึ้นจอขาวสำหรับนักเรียน ลองทดสอบลิงก์ก่อนแจกจริง';
+    }
+  }
+  if(h==='docs.google.com'&&!/\/forms\//.test(url)){
+    return 'ลิงก์ Google นี้ไม่ใช่ Forms (เช่น Docs/Slides/Sheets) มักไม่ยอมให้ฝังในกรอบ — ลองทดสอบลิงก์ก่อนแจกจริง';
+  }
+  return null;
+}
+
 var params=new URLSearchParams(location.search);
 var tParam=params.get('t');
 
@@ -2647,6 +2679,16 @@ function initTeacherMode(){
     var target=document.getElementById('targetUrl').value.trim();
     if(!target){alert('ใส่ลิงก์แบบฝึกหัดก่อนนะ');return;}
     if(!/^https?:\/\//i.test(target)){alert('ลิงก์ต้องขึ้นต้นด้วย http:// หรือ https://');return;}
+    target=normalizeTarget(target);
+
+    var warnBox=document.getElementById('embedWarn');
+    var knownBad=checkKnownUnembeddable(target);
+    if(knownBad){
+      warnBox.style.display='block';
+      warnBox.textContent='⚠️ '+knownBad;
+    }else{
+      warnBox.style.display='none';
+    }
 
     var title=document.getElementById('assignTitle').value.trim();
     var penalty=Math.max(1,parseInt(document.getElementById('cfgPenalty').value)||20);
