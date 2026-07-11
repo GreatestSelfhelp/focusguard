@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FocusGuard Game — โหมดเกม</title>
+<meta name="theme-color" content="#0a0c12">
+<style>
+:root{
+  --bg:#0a0c12; --bg2:#0e1117;
+  --card:#141a26; --card2:#1a2233;
+  --bd:#1e2941; --bd2:#2c3c5c;
+  --tx:#c8d6f0; --tx2:#7088b0; --tx3:#46587c;
+  --cyan:#00d8f0; --blue:#3a82f8; --gold:#f8d030; --pink:#f04898; --green:#10c860; --red:#ff4d5e;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans Thai','Sarabun',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100dvh;
+  background:
+    radial-gradient(1100px 600px at 50% -10%,rgba(0,216,240,.10),transparent 60%),
+    radial-gradient(900px 500px at 100% 110%,rgba(240,72,152,.07),transparent 55%),
+    var(--bg);
+}
+a{color:inherit;}
+button,input,textarea{font-family:inherit;}
+::selection{background:rgba(0,216,240,.25);}
+
+.wrap{width:100%;max-width:720px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) 18px 40px;}
+.head{text-align:center;margin-bottom:28px;}
+.kw{font-size:11px;letter-spacing:.3em;color:var(--cyan);text-transform:uppercase;font-weight:600;margin-bottom:8px;opacity:.85;}
+.title{font-size:30px;font-weight:700;letter-spacing:-.01em;}
+.title .dot{color:var(--cyan);}
+.sub{margin-top:8px;font-size:14px;color:var(--tx2);line-height:1.5;}
+
+.card{
+  background:linear-gradient(160deg,var(--card),var(--bg2));
+  border:1px solid var(--bd);border-radius:18px;padding:20px;margin-bottom:16px;
+}
+.card h3{font-size:15px;font-weight:650;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12.5px;color:var(--tx2);margin-bottom:6px;font-weight:600;}
+.field .hint{font-size:11.5px;color:var(--tx3);margin-top:5px;line-height:1.5;}
+input[type=text],input[type=number],textarea{
+  width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:11px;
+  padding:11px 13px;color:var(--tx);font-size:14.5px;outline:none;
+}
+input:focus,textarea:focus{border-color:var(--bd2);}
+textarea{resize:vertical;min-height:70px;font-family:ui-monospace,Consolas,monospace;font-size:12px;}
+#gameCode{min-height:160px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(160deg,var(--cyan),var(--blue));color:#031018;
+  border:none;border-radius:12px;padding:13px 20px;font-size:14.5px;font-weight:700;
+  cursor:pointer;width:100%;transition:transform .12s,opacity .12s;
+}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.45;cursor:default;}
+.btn.ghost{background:var(--card2);color:var(--tx);border:1px solid var(--bd2);}
+.btn.small{width:auto;padding:9px 14px;font-size:13px;}
+
+.copyrow{display:flex;gap:8px;}
+.copyrow input{flex:1;}
+
+.foot{text-align:center;margin-top:20px;font-size:11.5px;color:var(--tx3);line-height:1.6;}
+
+/* size meter */
+.sizemeter{display:none;margin-top:10px;font-size:12.5px;line-height:1.6;padding:11px 13px;border-radius:11px;}
+.sizemeter.g{background:rgba(16,200,96,.09);border:1px solid rgba(16,200,96,.3);color:var(--green);}
+.sizemeter.y{background:rgba(248,208,48,.08);border:1px solid rgba(248,208,48,.28);color:var(--gold);}
+.sizemeter.r{background:rgba(255,77,94,.09);border:1px solid rgba(255,77,94,.32);color:#ff97a1;}
+
+.pinbox{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:rgba(248,208,48,.08);border:1px solid rgba(248,208,48,.3);border-radius:12px;
+  padding:12px 14px;margin-bottom:14px;
+}
+.pinbox .pin{font-size:24px;font-weight:800;letter-spacing:.15em;color:var(--gold);font-family:ui-monospace,monospace;}
+.pinbox .label{font-size:11.5px;color:var(--tx2);}
+
+.decodeResult{display:none;margin-top:14px;font-size:13px;line-height:1.7;}
+.decodeResult .vline{border-bottom:1px dashed var(--bd);padding:6px 0;display:flex;justify-content:space-between;gap:10px;}
+.decodeResult .vline:last-child{border-bottom:none;}
+
+/* student view */
+#studentView{display:none;}
+.sv-start{max-width:480px;margin:0 auto;padding-top:8vh;}
+.sv-start .card{text-align:center;}
+.sv-rules{text-align:left;font-size:13.5px;color:var(--tx2);line-height:1.9;margin:14px 0;}
+.sv-rules li{margin-bottom:4px;}
+
+.sv-app{display:none;flex-direction:column;height:100dvh;}
+.sv-bar{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--card);border-bottom:1px solid var(--bd);flex-shrink:0;
+}
+.sv-score{font-size:15px;font-weight:800;font-family:ui-monospace,monospace;}
+.sv-score.ok{color:var(--green);}
+.sv-score.warn{color:var(--gold);}
+.sv-score.bad{color:var(--red);}
+.sv-vc{font-size:11.5px;color:var(--tx2);}
+.sv-bar .btn{width:auto;padding:8px 12px;font-size:12.5px;margin-left:auto;flex-shrink:0;}
+.sv-frame-wrap{flex:1;position:relative;background:#0a0c12;}
+.sv-frame-wrap iframe{width:100%;height:100%;border:none;display:block;background:#fff;}
+
+.overlay{
+  position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  padding:20px;text-align:center;
+}
+.overlay.warn{background:rgba(255,77,94,.94);pointer-events:none;}
+.overlay .oico{font-size:44px;margin-bottom:10px;}
+.overlay .otitle{font-size:22px;font-weight:800;color:#1a0004;margin-bottom:6px;}
+.overlay .odesc{font-size:14.5px;color:#3a0008;font-weight:600;}
+
+.overlay.lock{background:rgba(8,10,16,.97);flex-direction:column;}
+.overlay.lock .lockcard{max-width:360px;width:100%;}
+.overlay.lock .lockico{font-size:48px;margin-bottom:12px;}
+.overlay.lock h2{font-size:21px;margin-bottom:8px;}
+.overlay.lock p{font-size:13.5px;color:var(--tx2);margin-bottom:16px;line-height:1.6;}
+.pinentry{display:flex;gap:8px;justify-content:center;margin-bottom:10px;}
+.pinentry input{
+  width:100%;text-align:center;font-size:20px;letter-spacing:.3em;font-family:ui-monospace,monospace;
+}
+.shake{animation:shake .35s;}
+@keyframes shake{10%,90%{transform:translateX(-4px)}20%,80%{transform:translateX(6px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+
+.modal-bg{position:fixed;inset:0;background:rgba(4,6,10,.75);z-index:60;display:none;align-items:center;justify-content:center;padding:18px;}
+.modal{max-width:460px;width:100%;background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--bd2);border-radius:18px;padding:22px;max-height:86vh;overflow:auto;}
+.modal h3{font-size:17px;margin-bottom:10px;}
+.modal p{font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:12px;}
+.modal .close{float:right;background:none;border:none;color:var(--tx3);font-size:20px;cursor:pointer;line-height:1;}
+
+.errpage{max-width:420px;margin:14vh auto 0;text-align:center;}
+</style>
+</head>
+<body>
+
+<!-- ============ TEACHER: GAME BUILDER ============ -->
+<div id="teacherView">
+<div class="wrap">
+  <div class="head">
+    <div class="kw">FocusGuard · โหมดเกม</div>
+    <div class="title">เกมของคุณ<span class="dot">.</span></div>
+    <div class="sub">วางโค้ด HTML ของเกม (เช่นจาก Gemini Canvas) — ระบบห่อด้วยโดม<br>เกมรันจากหน้านี้เอง ไม่ใช่จาก Google จึงฝังได้เสมอ</div>
+  </div>
+
+  <div class="card">
+    <h3>🎮 1. โค้ดเกม</h3>
+    <div class="field">
+      <label>วางโค้ด HTML ทั้งหมดของเกม (คัดลอกจากมุมมองโค้ดใน Gemini Canvas)</label>
+      <textarea id="gameCode" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;...&lt;/html&gt;"></textarea>
+      <div class="hint">เกมต้องรันได้ในตัวเอง (ไม่เรียก API ของ Gemini สด) — เกมแบบตรรกะ/คำถาม/อาร์เคดทำงานได้เต็มที่ เกมที่คุยกับ AI สดๆ จะใช้ไม่ได้เพราะไม่มีกุญแจ API ติดไปด้วย</div>
+    </div>
+    <div id="sizeMeter" class="sizemeter"></div>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ 2. ตั้งกติกา</h3>
+    <div class="field">
+      <label>ชื่อเกม/กิจกรรม (ไม่บังคับ)</label>
+      <input type="text" id="assignTitle" placeholder="เช่น เกมผจญภัยคณิตศาสตร์">
+    </div>
+    <div class="row3">
+      <div class="field">
+        <label>หักคะแนน/ครั้ง</label>
+        <input type="number" id="cfgPenalty" value="20" min="5" max="100" step="5">
+      </div>
+      <div class="field">
+        <label>ผ่อนผัน (วิ)</label>
+        <input type="number" id="cfgGrace" value="3" min="0" max="30" step="1">
+      </div>
+      <div class="field">
+        <label>ล็อกเมื่อครบ (ครั้ง)</label>
+        <input type="number" id="cfgMaxViol" value="3" min="1" max="10" step="1">
+      </div>
+    </div>
+    <div class="hint">"ผ่อนผัน" = สลับแท็บสั้นๆ (เช่นแตะแจ้งเตือน) ไม่นับผิด ถ้านานกว่านี้ถึงจะโดนหัก</div>
+  </div>
+
+  <button class="btn" id="genBtn">✨ สร้างลิงก์เกม</button>
+
+  <div id="resultBox" style="display:none">
+    <div class="card">
+      <h3>✅ ลิงก์พร้อมแล้ว</h3>
+      <div class="field">
+        <label>ลิงก์สำหรับนักเรียน</label>
+        <div class="copyrow">
+          <input type="text" id="outLink" readonly>
+          <button class="btn small ghost" id="copyLinkBtn">คัดลอก</button>
+        </div>
+        <div class="hint">ลิงก์นี้ยาว (เกมทั้งเกมอยู่ในลิงก์) — ไม่มี QR ให้สแกน ส่งผ่าน Google Classroom หรือคัดลอกวางใน Line ได้</div>
+      </div>
+      <div class="pinbox">
+        <div>
+          <div class="label">รหัสปลดล็อก (เก็บไว้กับครูเท่านั้น)</div>
+          <div class="pin" id="outPin">----</div>
+        </div>
+        <button class="btn small ghost" id="copyPinBtn">คัดลอก</button>
+      </div>
+      <div class="hint" style="margin-bottom:12px">ถ้านักเรียนถูกล็อกหน้าจอ ให้ครูพิมพ์รหัสนี้ให้นักเรียนปลดล็อกเอง</div>
+      <a class="btn ghost" id="testLinkBtn" target="_blank" style="text-decoration:none;display:flex">🧪 ทดสอบลิงก์ก่อนแจกจริงเสมอ</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 3. ตรวจรหัสยืนยันจากนักเรียน</h3>
+    <div class="field">
+      <label>วางรหัสยืนยันที่นักเรียนส่งมา</label>
+      <textarea id="decodeInput" placeholder="วางรหัสยืนยันตรงนี้..." style="min-height:70px"></textarea>
+    </div>
+    <button class="btn ghost" id="decodeBtn">ถอดรหัส</button>
+    <div class="decodeResult" id="decodeResult"></div>
+  </div>
+
+  <div class="foot">
+    เกมรันในกรอบแซนด์บ็อกซ์แยกจากหน้าครอบ — โค้ดเกมแตะคะแนน/ระบบล็อกไม่ได้<br>
+    ป้องกันการใช้อุปกรณ์เครื่องที่สองไม่ได้ — เป็นเครื่องมือช่วยสังเกต ไม่ใช่ระบบรักษาความปลอดภัยเต็มรูปแบบ<br><br>
+    <a href="index.html" style="color:var(--cyan)">← ลิงก์แบบฝึกหัดทั่วไป</a> · <a href="quiz.html" style="color:var(--cyan)">ควิซสด →</a>
+  </div>
+</div>
+</div>
+
+<!-- ============ STUDENT / GAME VIEW ============ -->
+<div id="studentView">
+
+  <div class="sv-start" id="svStart">
+    <div class="wrap" style="max-width:480px;padding-top:0">
+      <div class="head">
+        <div class="kw">FocusGuard · โหมดเกม</div>
+        <div class="title">โฟกัสการ์ด<span class="dot">.</span></div>
+      </div>
+      <div class="card">
+        <div id="svAssignTitle" style="font-size:15px;font-weight:700;margin-bottom:10px;"></div>
+        <ul class="sv-rules">
+          <li>👀 ห้ามสลับแท็บ สลับแอป หรือออกจากหน้าจอนี้ระหว่างเล่น</li>
+          <li>⏱️ ออกไปสั้นๆ ไม่เป็นไร แต่ถ้านานเกินไปจะถูกหักคะแนน</li>
+          <li>🔒 ถ้าโดนหักครบตามกำหนด หน้าจอจะถูกล็อก ต้องให้ครูปลดล็อก</li>
+          <li>🎯 คะแนนและประวัติจะถูกสร้างเป็น "รหัสยืนยัน" ให้ส่งครู</li>
+        </ul>
+        <button class="btn" id="svStartBtn">🚀 เริ่มเล่น</button>
+      </div>
+      <div class="foot">อุปกรณ์เครื่องที่สองตรวจไม่ได้ — ระบบนี้ช่วยสังเกต ไม่ใช่ป้องกันการโกงแบบสมบูรณ์</div>
+    </div>
+  </div>
+
+  <div class="sv-app" id="svApp">
+    <div class="sv-bar">
+      <div class="sv-score ok" id="svScore">100</div>
+      <div class="sv-vc" id="svVc">0 ครั้ง</div>
+      <button class="btn small ghost" id="svFinishBtn">รับรหัสยืนยัน</button>
+    </div>
+    <div class="sv-frame-wrap">
+      <iframe id="svFrame" sandbox="allow-scripts allow-forms allow-modals allow-pointer-lock allow-popups"></iframe>
+    </div>
+  </div>
+
+  <div class="overlay warn" id="svWarnOverlay">
+    <div>
+      <div class="oico">👀</div>
+      <div class="otitle" id="svWarnTitle">ครูเห็นนะ</div>
+      <div class="odesc" id="svWarnDesc"></div>
+    </div>
+  </div>
+
+  <div class="overlay lock" id="svLockOverlay">
+    <div class="lockcard">
+      <div class="lockico">🔒</div>
+      <h2>หน้าจอถูกล็อกแล้ว</h2>
+      <p>โดนหักคะแนนครบตามที่ครูกำหนด<br>ยกมือแจ้งครูเพื่อขอรหัสปลดล็อก</p>
+      <div class="pinentry">
+        <input type="text" id="svPinInput" inputmode="numeric" maxlength="6" placeholder="รหัสปลดล็อก">
+      </div>
+      <button class="btn" id="svUnlockBtn">ปลดล็อก</button>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="svCodeModalBg">
+    <div class="modal">
+      <button class="close" id="svCodeClose">✕</button>
+      <h3>🎯 รหัสยืนยันของคุณ</h3>
+      <p>คัดลอกรหัสนี้ส่งให้ครูตามที่ครูสั่ง</p>
+      <textarea id="svCodeOut" readonly style="min-height:110px"></textarea>
+      <button class="btn" id="svCodeCopyBtn" style="margin-top:10px">คัดลอกรหัส</button>
+    </div>
+  </div>
+
+  <div class="errpage" id="svErr" style="display:none">
+    <div class="card">
+      <h3>⚠️ ลิงก์ไม่ถูกต้อง</h3>
+      <p style="color:var(--tx2);font-size:13.5px;line-height:1.6">ลิงก์นี้อาจถูกแก้ไข ตัดขาด หรือเสียหาย ลองขอลิงก์ใหม่จากครูอีกครั้ง (ลิงก์เกมยาวมาก บางแอปอาจตัดลิงก์ตอนคัดลอก)</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ vendored: pieroxy/lz-string (WTFPL) ============ -->
+<script>
+// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+// This work is free. You can redistribute it and/or modify it
+// under the terms of the WTFPL, Version 2
+// For more information see LICENSE.txt or http://www.wtfpl.net/
+//
+// For more information, the home page:
+// http://pieroxy.net/blog/pages/lz-string/testing.html
+//
+// LZ-based compression algorithm, version 1.4.5
+var LZString = (function() {
+
+// private property
+var f = String.fromCharCode;
+var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+var baseReverseDic = {};
+
+function getBaseValue(alphabet, character) {
+  if (!baseReverseDic[alphabet]) {
+    baseReverseDic[alphabet] = {};
+    for (var i=0 ; i<alphabet.length ; i++) {
+      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+    }
+  }
+  return baseReverseDic[alphabet][character];
+}
+
+var LZString = {
+  compressToBase64 : function (input) {
+    if (input == null) return "";
+    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+    switch (res.length % 4) { // To produce valid Base64
+    default: // When could this happen ?
+    case 0 : return res;
+    case 1 : return res+"===";
+    case 2 : return res+"==";
+    case 3 : return res+"=";
+    }
+  },
+
+  decompressFromBase64 : function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+  },
+
+  compressToUTF16 : function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+  },
+
+  decompressFromUTF16: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+  },
+
+  //compress into uint8array (UCS-2 big endian format)
+  compressToUint8Array: function (uncompressed) {
+    var compressed = LZString.compress(uncompressed);
+    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
+
+    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+      var current_value = compressed.charCodeAt(i);
+      buf[i*2] = current_value >>> 8;
+      buf[i*2+1] = current_value % 256;
+    }
+    return buf;
+  },
+
+  //decompress from uint8array (UCS-2 big endian format)
+  decompressFromUint8Array:function (compressed) {
+    if (compressed===null || compressed===undefined){
+        return LZString.decompress(compressed);
+    } else {
+        var buf=new Array(compressed.length/2); // 2 bytes per character
+        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+          buf[i]=compressed[i*2]*256+compressed[i*2+1];
+        }
+
+        var result = [];
+        buf.forEach(function (c) {
+          result.push(f(c));
+        });
+        return LZString.decompress(result.join(''));
+
+    }
+
+  },
+
+
+  //compress into a string that is already URI encoded
+  compressToEncodedURIComponent: function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+  },
+
+  //decompress from an output of compressToEncodedURIComponent
+  decompressFromEncodedURIComponent:function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    input = input.replace(/ /g, "+");
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+  },
+
+  compress: function (uncompressed) {
+    return LZString._compress(uncompressed, 16, function(a){return f(a);});
+  },
+  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+    if (uncompressed == null) return "";
+    var i, value,
+        context_dictionary= {},
+        context_dictionaryToCreate= {},
+        context_c="",
+        context_wc="",
+        context_w="",
+        context_enlargeIn= 2, // Compensate for the first entry which should not count
+        context_dictSize= 3,
+        context_numBits= 2,
+        context_data=[],
+        context_data_val=0,
+        context_data_position=0,
+        ii;
+
+    for (ii = 0; ii < uncompressed.length; ii += 1) {
+      context_c = uncompressed.charAt(ii);
+      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+        context_dictionary[context_c] = context_dictSize++;
+        context_dictionaryToCreate[context_c] = true;
+      }
+
+      context_wc = context_w + context_c;
+      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+        context_w = context_wc;
+      } else {
+        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+          if (context_w.charCodeAt(0)<256) {
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<8 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          } else {
+            value = 1;
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1) | value;
+              if (context_data_position ==bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = 0;
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<16 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          }
+          context_enlargeIn--;
+          if (context_enlargeIn == 0) {
+            context_enlargeIn = Math.pow(2, context_numBits);
+            context_numBits++;
+          }
+          delete context_dictionaryToCreate[context_w];
+        } else {
+          value = context_dictionary[context_w];
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+
+
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        // Add wc to the dictionary.
+        context_dictionary[context_wc] = context_dictSize++;
+        context_w = String(context_c);
+      }
+    }
+
+    // Output the code for w.
+    if (context_w !== "") {
+      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+        if (context_w.charCodeAt(0)<256) {
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<8 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        } else {
+          value = 1;
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | value;
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = 0;
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<16 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        delete context_dictionaryToCreate[context_w];
+      } else {
+        value = context_dictionary[context_w];
+        for (i=0 ; i<context_numBits ; i++) {
+          context_data_val = (context_data_val << 1) | (value&1);
+          if (context_data_position == bitsPerChar-1) {
+            context_data_position = 0;
+            context_data.push(getCharFromInt(context_data_val));
+            context_data_val = 0;
+          } else {
+            context_data_position++;
+          }
+          value = value >> 1;
+        }
+
+
+      }
+      context_enlargeIn--;
+      if (context_enlargeIn == 0) {
+        context_enlargeIn = Math.pow(2, context_numBits);
+        context_numBits++;
+      }
+    }
+
+    // Mark the end of the stream
+    value = 2;
+    for (i=0 ; i<context_numBits ; i++) {
+      context_data_val = (context_data_val << 1) | (value&1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data_position = 0;
+        context_data.push(getCharFromInt(context_data_val));
+        context_data_val = 0;
+      } else {
+        context_data_position++;
+      }
+      value = value >> 1;
+    }
+
+    // Flush the last char
+    while (true) {
+      context_data_val = (context_data_val << 1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data.push(getCharFromInt(context_data_val));
+        break;
+      }
+      else context_data_position++;
+    }
+    return context_data.join('');
+  },
+
+  decompress: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+  },
+
+  _decompress: function (length, resetValue, getNextValue) {
+    var dictionary = [],
+        next,
+        enlargeIn = 4,
+        dictSize = 4,
+        numBits = 3,
+        entry = "",
+        result = [],
+        i,
+        w,
+        bits, resb, maxpower, power,
+        c,
+        data = {val:getNextValue(0), position:resetValue, index:1};
+
+    for (i = 0; i < 3; i += 1) {
+      dictionary[i] = i;
+    }
+
+    bits = 0;
+    maxpower = Math.pow(2,2);
+    power=1;
+    while (power!=maxpower) {
+      resb = data.val & data.position;
+      data.position >>= 1;
+      if (data.position == 0) {
+        data.position = resetValue;
+        data.val = getNextValue(data.index++);
+      }
+      bits |= (resb>0 ? 1 : 0) * power;
+      power <<= 1;
+    }
+
+    switch (next = bits) {
+      case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 2:
+        return "";
+    }
+    dictionary[3] = c;
+    w = c;
+    result.push(c);
+    while (true) {
+      if (data.index > length) {
+        return "";
+      }
+
+      bits = 0;
+      maxpower = Math.pow(2,numBits);
+      power=1;
+      while (power!=maxpower) {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0) {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb>0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+
+      switch (c = bits) {
+        case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 2:
+          return result.join('');
+      }
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+      if (dictionary[c]) {
+        entry = dictionary[c];
+      } else {
+        if (c === dictSize) {
+          entry = w + w.charAt(0);
+        } else {
+          return null;
+        }
+      }
+      result.push(entry);
+
+      // Add w+entry[0] to the dictionary.
+      dictionary[dictSize++] = w + entry.charAt(0);
+      enlargeIn--;
+
+      w = entry;
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+    }
+  }
+};
+  return LZString;
+})();
+
+if (typeof define === 'function' && define.amd) {
+  define(function () { return LZString; });
+} else if( typeof module !== 'undefined' && module != null ) {
+  module.exports = LZString
+} else if( typeof angular !== 'undefined' && angular != null ) {
+  angular.module('LZString', [])
+  .factory('LZString', function () {
+    return LZString;
+  });
+}
+
+</script>
+
+<script>
+/* ============ shared helpers ============ */
+function b64url(str){
+  return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function unb64url(str){
+  str=str.replace(/-/g,'+').replace(/_/g,'/');
+  while(str.length%4)str+='=';
+  return decodeURIComponent(escape(atob(str)));
+}
+function fghash(str){
+  var h=5381;
+  for(var i=0;i<str.length;i++){h=((h<<5)+h+str.charCodeAt(i))|0;}
+  return (h>>>0).toString(36);
+}
+function fmtSec(s){
+  s=Math.round(s);
+  if(s<60)return s+' วิ';
+  return Math.floor(s/60)+' นาที '+(s%60)+' วิ';
+}
+function copyText(text,btn){
+  navigator.clipboard.writeText(text).then(function(){
+    var orig=btn.textContent;
+    btn.textContent='คัดลอกแล้ว ✓';
+    setTimeout(function(){btn.textContent=orig;},1500);
+  }).catch(function(){
+    alert(text);
+  });
+}
+function decodeIntegrityCode(raw){
+  var parts=raw.trim().split('.');
+  if(parts.length<2)return null;
+  var check=parts.pop();
+  var b64=parts.join('.');
+  var valid=(fghash(b64)===check);
+  try{
+    var json=unb64url(b64);
+    var data=JSON.parse(json);
+    return {valid:valid,data:data};
+  }catch(e){
+    return null;
+  }
+}
+
+var hashParams=new URLSearchParams(location.hash.replace(/^#/,''));
+var gParam=hashParams.get('g');
+
+if(gParam){
+  document.getElementById('teacherView').style.display='none';
+  initStudentMode();
+}else{
+  initTeacherMode();
+}
+
+/* ============ TEACHER MODE ============ */
+function initTeacherMode(){
+  var codeBox=document.getElementById('gameCode');
+  codeBox.addEventListener('input',updateSizeMeter);
+  function updateSizeMeter(){
+    var html=codeBox.value;
+    var meter=document.getElementById('sizeMeter');
+    if(!html.trim()){meter.style.display='none';return;}
+    var raw=new Blob([html]).size;
+    var compressed=LZString.compressToEncodedURIComponent(html).length;
+    var verdict,cls;
+    if(compressed<8000){verdict='🟢 ลิงก์สั้น พอดี — คัดลอกวางที่ไหนก็ได้สบายๆ';cls='g';}
+    else if(compressed<50000){verdict='🟡 ลิงก์ยาว — แนะนำแจกผ่าน Google Classroom แทนแอปแชท (บางแอปตัดลิงก์ยาว)';cls='y';}
+    else{verdict='🔴 ลิงก์ยาวมาก — บางเบราว์เซอร์/แอปอาจตัดขาด ลองลดขนาดโค้ดเกม (เอา comment/ช่องว่างส่วนเกินออก) แล้วลองใหม่';cls='r';}
+    meter.className='sizemeter '+cls;
+    meter.innerHTML='ขนาดโค้ดเกม: '+Math.round(raw/1024)+' KB → บีบอัดแล้ว ~'+Math.round(compressed/1024)+' KB ในลิงก์<br>'+verdict+'<br><span style="opacity:.8">ทดสอบลิงก์จริงก่อนแจกเสมอ (ตัวเลขนี้เป็นการประมาณ)</span>';
+    meter.style.display='block';
+  }
+
+  document.getElementById('genBtn').addEventListener('click',function(){
+    var html=codeBox.value;
+    if(!html.trim()){alert('วางโค้ด HTML ของเกมก่อนนะ');return;}
+    if(!/<\s*html/i.test(html)){
+      if(!confirm('โค้ดนี้ดูไม่เหมือนไฟล์ HTML ทั้งไฟล์ (ไม่มีแท็ก <html>) — จะสร้างลิงก์ต่อไหม?'))return;
+    }
+
+    var title=document.getElementById('assignTitle').value.trim();
+    var penalty=Math.max(1,parseInt(document.getElementById('cfgPenalty').value)||20);
+    var grace=Math.max(0,parseInt(document.getElementById('cfgGrace').value)||3);
+    var maxViol=Math.max(1,parseInt(document.getElementById('cfgMaxViol').value)||3);
+    var pin=String(Math.floor(1000+Math.random()*9000));
+    var pinHash=fghash(pin);
+
+    var cfg={p:penalty,g:grace,m:maxViol,ph:pinHash,ti:title};
+    var compressedGame=LZString.compressToEncodedURIComponent(html);
+    var link=location.origin+location.pathname+
+      '#g='+compressedGame+
+      '&c='+b64url(JSON.stringify(cfg));
+
+    document.getElementById('outLink').value=link;
+    document.getElementById('outPin').textContent=pin;
+    document.getElementById('testLinkBtn').href=link;
+
+    document.getElementById('resultBox').style.display='block';
+    document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  document.getElementById('copyLinkBtn').addEventListener('click',function(){
+    copyText(document.getElementById('outLink').value,this);
+  });
+  document.getElementById('copyPinBtn').addEventListener('click',function(){
+    copyText(document.getElementById('outPin').textContent,this);
+  });
+
+  document.getElementById('decodeBtn').addEventListener('click',function(){
+    var raw=document.getElementById('decodeInput').value.trim();
+    var box=document.getElementById('decodeResult');
+    if(!raw){box.style.display='none';return;}
+    var parsed=decodeIntegrityCode(raw);
+    if(!parsed){
+      box.style.display='block';
+      box.innerHTML='<div style="color:var(--red);font-weight:700">ถอดรหัสไม่ได้ — รหัสอาจไม่ครบหรือถูกแก้ไข</div>';
+      return;
+    }
+    var d=parsed.data;
+    var durationMin=Math.round((d.et-d.st)/60000);
+    var html='';
+    html+='<div class="vline"><span>ผลตรวจสอบ</span><b style="color:'+(parsed.valid?'var(--green)':'var(--red)')+'">'+(parsed.valid?'✅ ผ่าน — ไม่ถูกแก้ไข':'⚠️ ไม่ผ่าน — อาจถูกแก้ไข')+'</b></div>';
+    html+='<div class="vline"><span>คะแนนสุดท้าย</span><b>'+d.s+' / 100</b></div>';
+    html+='<div class="vline"><span>จำนวนครั้งที่สลับหน้าจอ</span><b>'+d.vc+' ครั้ง</b></div>';
+    html+='<div class="vline"><span>ถูกล็อกหน้าจอ</span><b>'+(d.lk>0?d.lk+' ครั้ง':'ไม่โดน')+'</b></div>';
+    html+='<div class="vline"><span>ใช้เวลาทั้งหมด</span><b>~'+durationMin+' นาที</b></div>';
+    if(d.viol&&d.viol.length){
+      html+='<div style="margin-top:8px;font-size:12px;color:var(--tx2)">รายละเอียดการสลับหน้าจอ:</div>';
+      d.viol.forEach(function(v,i){
+        var typeLabel=v[2]===1?'ออกจากโหมดเต็มจอ':'สลับแท็บ/แอป';
+        html+='<div class="vline"><span>ครั้งที่ '+(i+1)+' — นาทีที่ '+Math.floor(v[0]/60)+'</span><b>'+typeLabel+(v[1]>0?' ('+fmtSec(v[1])+')':'')+'</b></div>';
+      });
+    }
+    box.innerHTML=html;
+    box.style.display='block';
+  });
+}
+
+/* ============ STUDENT MODE ============ */
+function initStudentMode(){
+  document.getElementById('studentView').style.display='block';
+
+  var gameHtml,cfg;
+  try{
+    gameHtml=LZString.decompressFromEncodedURIComponent(gParam);
+    cfg=JSON.parse(unb64url(hashParams.get('c')));
+    if(!gameHtml)throw new Error('bad game payload');
+  }catch(e){
+    document.getElementById('svStart').style.display='none';
+    document.getElementById('svErr').style.display='block';
+    return;
+  }
+
+  document.getElementById('svAssignTitle').textContent=cfg.ti?cfg.ti:'เกม';
+
+  var score=100, violCount=0, lockCount=0, violations=[];
+  var startTime=null, hideStart=null, hadFullscreen=false, locked=false, started=false;
+  var gameHash=fghash(gameHtml.slice(0,500)+gameHtml.length);
+
+  document.getElementById('svStartBtn').addEventListener('click',function(){
+    started=true;
+    startTime=Date.now();
+    document.getElementById('svStart').style.display='none';
+    var app=document.getElementById('svApp');
+    app.style.display='flex';
+    // sandbox intentionally omits allow-same-origin: the game runs in an
+    // opaque unique origin, so its code cannot reach this parent page,
+    // its scoring state, or the unlock PIN — no matter what it does.
+    document.getElementById('svFrame').srcdoc=gameHtml;
+
+    var fsEl=document.documentElement;
+    var req=fsEl.requestFullscreen||fsEl.webkitRequestFullscreen||fsEl.mozRequestFullScreen;
+    if(req){
+      try{
+        var p=req.call(fsEl);
+        if(p&&p.then){p.then(function(){hadFullscreen=true;}).catch(function(){});}
+        else{hadFullscreen=true;}
+      }catch(e){}
+    }
+
+    attachMonitoring();
+  });
+
+  function attachMonitoring(){
+    document.addEventListener('visibilitychange',function(){
+      if(!started||locked)return;
+      if(document.hidden){
+        hideStart=performance.now();
+      }else if(hideStart!==null){
+        var dur=(performance.now()-hideStart)/1000;
+        hideStart=null;
+        if(dur>=cfg.g){
+          registerViolation(0,dur);
+        }
+      }
+    });
+    ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange'].forEach(function(ev){
+      document.addEventListener(ev,function(){
+        if(!started||locked||!hadFullscreen)return;
+        var fsNow=document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement;
+        if(!fsNow){
+          registerViolation(1,0);
+        }
+      });
+    });
+  }
+
+  function registerViolation(type,dur){
+    if(locked)return;
+    violations.push([Math.round((Date.now()-startTime)/1000),Math.round(dur),type]);
+    score=Math.max(0,score-cfg.p);
+    violCount++;
+    updateScoreUI();
+    showWarn(type,dur);
+    if(violCount>=cfg.m||score<=0){
+      lock();
+    }
+  }
+
+  function updateScoreUI(){
+    var el=document.getElementById('svScore');
+    el.textContent=score;
+    el.className='sv-score '+(score>=70?'ok':score>=35?'warn':'bad');
+    document.getElementById('svVc').textContent=violCount+' ครั้ง';
+  }
+
+  function showWarn(type,dur){
+    var title=document.getElementById('svWarnTitle');
+    var desc=document.getElementById('svWarnDesc');
+    if(type===1){
+      title.textContent='ออกจากโหมดเต็มจอ 👀';
+      desc.textContent='ครั้งที่ '+violCount+'/'+cfg.m+' — คะแนนเหลือ '+score;
+    }else{
+      title.textContent='ครูเห็นนะ 👀';
+      desc.textContent='ออกจากหน้าจอไป '+fmtSec(dur)+' (ครั้งที่ '+violCount+'/'+cfg.m+') — คะแนนเหลือ '+score;
+    }
+    var ov=document.getElementById('svWarnOverlay');
+    ov.style.display='flex';
+    setTimeout(function(){ov.style.display='none';},2800);
+  }
+
+  function lock(){
+    locked=true;
+    document.getElementById('svLockOverlay').style.display='flex';
+  }
+
+  document.getElementById('svUnlockBtn').addEventListener('click',function(){
+    var input=document.getElementById('svPinInput');
+    if(fghash(input.value.trim())===cfg.ph){
+      lockCount++;
+      locked=false;
+      input.value='';
+      document.getElementById('svLockOverlay').style.display='none';
+    }else{
+      var card=document.querySelector('#svLockOverlay .lockcard');
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+    }
+  });
+
+  document.getElementById('svFinishBtn').addEventListener('click',function(){
+    var payload={
+      v:1,
+      th:gameHash,
+      s:score,
+      vc:violCount,
+      lk:lockCount,
+      viol:violations,
+      st:startTime||Date.now(),
+      et:Date.now()
+    };
+    var b64=b64url(JSON.stringify(payload));
+    var code=b64+'.'+fghash(b64);
+    document.getElementById('svCodeOut').value=code;
+    document.getElementById('svCodeModalBg').style.display='flex';
+  });
+  document.getElementById('svCodeClose').addEventListener('click',function(){
+    document.getElementById('svCodeModalBg').style.display='none';
+  });
+  document.getElementById('svCodeCopyBtn').addEventListener('click',function(){
+    copyText(document.getElementById('svCodeOut').value,this);
+  });
+}
+</script>
+</body>
+</html>
